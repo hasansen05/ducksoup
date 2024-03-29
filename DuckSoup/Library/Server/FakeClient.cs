@@ -96,6 +96,7 @@ public class FakeClient : TcpClient
             Log.Error("FakeClient Recv | 0x{0:X} | Name: {1} | Id: {2} | ServerType: {3} ", message, (charInfo != null? charInfo.CharName : "null"), charId, FakeServer.Service.ServerType);
             Log.Error("FakeClient Recv | {0}", exception.Message);
             Log.Error("FakeClient Recv | {0}", exception.StackTrace);
+            Log.Error("FakeSession Recv | {0}", exception.InnerException);
             Log.Error("FakeClient Recv | {0}", exception.Data);
             Session.Disconnect();
         }
