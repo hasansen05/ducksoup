@@ -67,6 +67,7 @@ public class FakeSession : TcpSession
             return;
         }
 
+        string message = String.Empty;
         try
         {
             ClientSecurity.Recv(buffer, (int)offset, (int)size);
@@ -78,7 +79,7 @@ public class FakeSession : TcpSession
             foreach (var packet in receivedPackets)
             {
                 var packetType = packet.Encrypted ? "[E]" : packet.Massive ? "[M]" : "";
-                var message = $"[C -> P] {packetType} Packet: 0x{packet.MsgId:X} - {Id}";
+                message = $"[C -> P] {packetType} Packet: 0x{packet.MsgId:X} - {Id}";
                 Log.Debug(message);
 
                 if (packet.MsgId == 0x5000 || packet.MsgId == 0x9000 || packet.MsgId == 0x2001) continue;
@@ -114,8 +115,12 @@ public class FakeSession : TcpSession
         }
         catch (Exception exception)
         {
+            Session.GetData(Data.CharInfo, out ICharInfo charInfo, null);
+            Session.GetData(Data.CharId, out int charId, -1);
+            Log.Error("FakeSession Recv | 0x{0:X} | Name: {1} | Id: {2} | ServerType: {3} ", message, (charInfo != null? charInfo.CharName : "null"), charId, FakeServer.Service.ServerType);
             Log.Error("FakeSession Recv | {0}", exception.Message);
             Log.Error("FakeSession Recv | {0}", exception.StackTrace);
+            Log.Error("FakeSession Recv | {0}", exception.Data);
             Session.Disconnect();
         }
     }
