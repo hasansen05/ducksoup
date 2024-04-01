@@ -10,6 +10,7 @@ using DuckSoup.Library.Session;
 using PacketLibrary.Handler;
 using PacketLibrary.VSRO188.Agent.Enums;
 using PacketLibrary.VSRO188.Agent.Server;
+using Serilog;
 using SilkroadSecurityAPI.Message;
 
 namespace DuckSoup.Library.Party;
@@ -64,12 +65,25 @@ public class PartyManagerHandlers
                 sess = await Helper.GetSessionByCharName(data.MemberInfo.Name);
                 if (sess == null) break;
 
+                sess.GetData(Data.CharInfo, out CharInfo? sessData, null);
+                if (sessData == null) break;
+                
                 var needsAdding = true;
                 var tParty = _partyManager.GetParty(session);
+                if (tParty == null)
+                {
+                    Log.Error("Couldn't find a party for the char {0}", sessData.CharName);
+                    break;
+                }
+                
                 foreach (var tPartyMember in tParty.Members)
                 {
                     tPartyMember.GetData(Data.CharInfo, out CharInfo? tPartyData, null);
-                    sess.GetData(Data.CharInfo, out CharInfo? sessData, null);
+                    if (tPartyData == null)
+                    {
+                        continue;
+                    }
+                    
                     if (tPartyData.Jid == sessData.Jid) needsAdding = false;
                 }
 
@@ -109,7 +123,7 @@ public class PartyManagerHandlers
 
     private async Task<Packet> PartyMatchingFormResponse(SERVER_PARTY_MATCHING_FORM_RESPONSE data, ISession session)
     {
-        IParty party;
+        IParty? party;
         if (data.Id == 0)
             party = new Party
             {
@@ -119,7 +133,14 @@ public class PartyManagerHandlers
                 PartySettingsFlag = data.partySetting
             };
         else
+        {
             party = _partyManager.GetParty((int)data.Id);
+        }
+
+        if (party == null)
+        {
+            return data;
+        }
 
         IPartyMatchEntry? partyMatchEntry = new PartyMatchEntry
         {
@@ -142,6 +163,11 @@ public class PartyManagerHandlers
         if (party != null || data.ID == 0) return data;
 
         var leaderSession = await Helper.GetSessionByAccountJid(data.LeaderJID);
+        if (leaderSession == null)
+        {
+            return data;
+        }
+        
         party = new Party
         {
             Leader = leaderSession,
@@ -150,17 +176,34 @@ public class PartyManagerHandlers
         };
 
         foreach (var dataMemberInfo in data.MemberInfos)
-            party.Members.Add(await Helper.GetSessionByAccountJid(dataMemberInfo.JID));
-
+        {
+            var sess = await Helper.GetSessionByAccountJid(dataMemberInfo.JID);
+            if (sess == null)
+            {
+                continue;
+            }
+            party.Members.Add(sess);
+        }
         _partyManager.AddParty(party);
 
         var partyMatchEntry = _partyManager.GetPartyMatchEntries()
             .FirstOrDefault(entry =>
             {
+                if (entry == null || entry.Party == null)
+                {
+                    return false;
+                }
+                
                 entry.Party.Leader.GetData(Data.CharInfo, out CharInfo? entryInfo, null);
                 leaderSession.GetData(Data.CharInfo, out CharInfo? leaderInfo, null);
+                if (entryInfo == null || leaderInfo == null)
+                {
+                    return false;
+                }
+                
                 return leaderInfo.Jid == entryInfo.Jid;
             });
+        
         if (partyMatchEntry != null) partyMatchEntry.Party = party;
 
         return data;
