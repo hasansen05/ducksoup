@@ -58,7 +58,10 @@ public class PartyManagerHandlers
         switch (data.PartyUpdateType)
         {
             case PartyUpdateType.Dismissed:
-                if (data.ErrorCode == PartyErrorCode.Dismissed) _partyManager.RemoveParty(session);
+                if (data.ErrorCode == PartyErrorCode.Dismissed)
+                {
+                    _partyManager.RemoveParty(session);
+                }
 
                 break;
             case PartyUpdateType.Joined:
@@ -95,7 +98,12 @@ public class PartyManagerHandlers
                 sess = await Helper.GetSessionByAccountJid((int)data.UserJID);
                 if (sess == null) break;
 
-                _partyManager.GetParty(session)?.Members.Remove(sess);
+                IParty? pt = _partyManager.GetParty(session);
+                if (pt == null || !pt.Members.Contains(sess))
+                {
+                    break;
+                }
+                pt.Members.Remove(sess);
                 break;
             case PartyUpdateType.Member:
                 break;
