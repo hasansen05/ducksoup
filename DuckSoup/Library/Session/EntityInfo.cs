@@ -243,7 +243,11 @@ public class EntityInfo
                     _packet.TryRead(out uint Buff_RefSkillID);
                     _packet.TryRead(out uint Buff_Duration);
                     var skill = await Cache.GetRefSkillAsync((int)Buff_RefSkillID);
-                    if (skill.ParamsContains(1701213281))
+                    if (skill == null)
+                    {
+                        Log.Error("EntityParse Skill Error: SkillId: {0} RefObjCommonId: ", Buff_RefSkillID, refObjId);
+                    }
+                    if (skill != null && skill.ParamsContains(1701213281))
                     {
                         //1701213281 -> atfe -> "auto transfer effect" like Recovery Division
                         _packet.TryRead(out bool Buff_IsCreator);
