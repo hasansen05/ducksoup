@@ -247,7 +247,7 @@ public class EntityInfo
                     var skill = await Cache.GetRefSkillAsync((int)Buff_RefSkillID);
                     if (skill == null)
                     {
-                        Log.Error("EntityParse Skill Error: SkillId: {0} RefObjCommonId: ", Buff_RefSkillID, refObjId);
+                        Log.Debug("EntityParse Skill Error: SkillId: {0} RefObjCommonId: ", Buff_RefSkillID, refObjId);
                     }
                     if (skill != null && skill.ParamsContains(1701213281))
                     {
@@ -515,7 +515,7 @@ public class EntityInfo
         }
         catch (Exception e)
         {
-            Log.Error("EntityParse Error: {0} \n{1}", e.Message, e.StackTrace);
+            Log.Debug("EntityParse Error: {0} \n{1}", e.Message, e.StackTrace);
         }
     }
 
