@@ -91,6 +91,7 @@ public class EntityInfo
     {
         if (_packet == null || _exit)
         {
+            Clear();
             return;
         }
 
@@ -102,6 +103,7 @@ public class EntityInfo
         _packet.TryRead(out uint refObjId);
         if (refObjId == uint.MaxValue)
         {
+            Clear();
             return;
         }
 
@@ -536,6 +538,7 @@ public class EntityInfo
         {
             if (_exit)
             {
+                Clear();
                 break;
             }
 
