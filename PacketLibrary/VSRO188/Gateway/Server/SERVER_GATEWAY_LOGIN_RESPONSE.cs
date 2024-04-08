@@ -29,23 +29,26 @@ public class SERVER_GATEWAY_LOGIN_RESPONSE : Packet
 
     public override async Task Read()
     {
-        TryRead(out Result); // 1   byte    result
+        TryRead<byte>(out Result); // 1   byte    result
         if (Result == 0x01)
         {
-            TryRead(out AgentServerToken); // 4   uint    AgentServer.Token
+            TryRead<uint>(out AgentServerToken); // 4   uint    AgentServer.Token
             AgentServer = new HostAndPort(this);
         }
         else if (Result == 0x02)
         {
-            TryRead(out ErrorCode); // 1   byte    errorCode
+            TryRead<LoginErrorCode>(out ErrorCode); // 1   byte    errorCode
             if (ErrorCode == LoginErrorCode.InvalidCredentials)
             {
                 MaxCurAttempts = new MaxCurAttempts(this);
             }
             else if (ErrorCode == LoginErrorCode.Blocked)
             {
-                TryRead(out BlockType); // 1   byte    blockType
-                if (BlockType == LoginBlockType.Punishment) PunishmentData = new Punishment(this);
+                TryRead<LoginBlockType>(out BlockType); // 1   byte    blockType
+                if (BlockType == LoginBlockType.Punishment)
+                {
+                    PunishmentData = new Punishment(this);
+                }
             }
         }
         else if (Result == 0x03) //Custom Message as A102 result, not supported by every client.
@@ -61,23 +64,23 @@ public class SERVER_GATEWAY_LOGIN_RESPONSE : Packet
     public override async Task<Packet> Build()
     {
         Reset();
-
-        TryWrite(Result);
+        
+        TryWrite<byte>(Result);
         if (Result == 0x01)
         {
-            TryWrite(AgentServerToken);
+            TryWrite<uint>(AgentServerToken);
             AgentServer.Build(this);
         }
         else if (Result == 0x02)
         {
-            TryWrite(ErrorCode);
+            TryWrite<byte>((byte)ErrorCode);
             if (ErrorCode == LoginErrorCode.InvalidCredentials)
             {
                 MaxCurAttempts.Build(this);
             }
             else if (ErrorCode == LoginErrorCode.Blocked)
             {
-                TryWrite(BlockType);
+                TryWrite<byte>((byte)BlockType);
                 if (BlockType == LoginBlockType.Punishment) PunishmentData.Build(this);
             }
         }
@@ -89,7 +92,7 @@ public class SERVER_GATEWAY_LOGIN_RESPONSE : Packet
             // response.WriteAscii();
             // response.WriteUInt16();
         }
-
+        
         return this;
     }
 

@@ -9,8 +9,8 @@ public class MaxCurAttempts
 
     public MaxCurAttempts(Packet packet)
     {
-        packet.TryRead(out MaxAttempts)
-            .TryRead(out CurAttempts);
+        packet.TryRead<uint>(out MaxAttempts)
+            .TryRead<uint>(out CurAttempts);
 
         // MaxAttempts = packet.ReadUInt32(); // 4   uint    MaxAttempts
         // CurAttempts = packet.ReadUInt32(); // 4   uint    CurAttempts
@@ -24,8 +24,8 @@ public class MaxCurAttempts
 
     public Packet Build(Packet packet)
     {
-        packet.TryWrite(MaxAttempts)
-            .TryWrite(CurAttempts);
+        packet.TryWrite<uint>(MaxAttempts)
+            .TryWrite<uint>(CurAttempts);
 
         // packet.WriteUInt32(MaxAttempts);
         // packet.WriteUInt32(CurAttempts);
