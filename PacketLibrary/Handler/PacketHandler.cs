@@ -216,23 +216,23 @@ public class PacketHandler : IPacketHandler
         foreach (var packetHandler in handler)
         {
             outcome = await packetHandler.Value.Handle(outcome, session);
-
-            if (packetHandler.Key == last)
+            // reset reader position, in case it was read before
+            outcome.SetReaderPosition(0);
+            
+            if (packetHandler.Key != last)
             {
-                await outcome.Build();
-                outcome.ToReadOnly();
+                continue;
             }
+            
+            await outcome.Build();
+            outcome.ToReadOnly();
 
             switch (outcome.ResultType)
             {
                 case PacketResultType.Disconnect:
-                    if (packetHandler.Key == last) return await _disconnectHandler.Handle(outcome, session);
-
-                    break;
+                    return await _disconnectHandler.Handle(outcome, session);
                 case PacketResultType.Block:
-                    if (packetHandler.Key == last) return await _blockHandler.Handle(outcome, session);
-
-                    break;
+                    return await _blockHandler.Handle(outcome, session);
                 case PacketResultType.Nothing:
                     break;
                 default:
@@ -257,23 +257,23 @@ public class PacketHandler : IPacketHandler
         foreach (var packetHandler in handler)
         {
             outcome = await packetHandler.Value.Handle(outcome, session);
-
-            if (packetHandler.Key == last)
+            // reset reader position, in case it was read before
+            outcome.SetReaderPosition(0);
+            
+            if (packetHandler.Key != last)
             {
-                await outcome.Build();
-                outcome.ToReadOnly();
+               continue;
             }
+            
+            await outcome.Build();
+            outcome.ToReadOnly();
 
             switch (outcome.ResultType)
             {
                 case PacketResultType.Disconnect:
-                    if (packetHandler.Key == last) return await _disconnectHandler.Handle(outcome, session);
-
-                    break;
-                case PacketResultType.Block:
-                    if (packetHandler.Key == last) return await _blockHandler.Handle(outcome, session);
-
-                    break;
+                    return await _disconnectHandler.Handle(outcome, session);
+                case PacketResultType.Block: 
+                    return await _blockHandler.Handle(outcome, session);
                 case PacketResultType.Nothing:
                     break;
                 default:
