@@ -159,6 +159,11 @@ public class Packet
         _reader = new PacketReader(_readerBytes);
     }
 
+    public void SetReaderPosition(long position)
+    {
+        _reader.BaseStream.Position = position;
+    }
+
     #endregion
 
     #region Read/Write
