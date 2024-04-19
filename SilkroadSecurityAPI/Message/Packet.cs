@@ -187,7 +187,7 @@ public class Packet
 
     public Packet TryReadString(out string value)
     {
-        return TryRead(out value, Encoding.UTF8);
+        return TryRead(out value, Encoding.Latin1);
     }
 
     public Packet TryReadUnicode(out string value)
@@ -246,7 +246,7 @@ public class Packet
 
     public Packet TryWriteString(string value)
     {
-        return TryWrite(value, Encoding.UTF8);
+        return TryWrite(value, Encoding.Latin1);
     }
 
     public Packet TryWriteUnicode(string value)
