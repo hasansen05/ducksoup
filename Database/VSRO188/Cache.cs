@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using Database.VSRO188.SRO_VT_ACCOUNT;
 using Database.VSRO188.SRO_VT_SHARD;
 using Microsoft.EntityFrameworkCore;
@@ -7,25 +8,32 @@ namespace Database.VSRO188;
 
 public static class Cache
 {
-    private static readonly Dictionary<int, _RefObjCommon> RefObjCommons = new();
-    private static readonly Dictionary<int, _RefObjItem> RefObjItems = new();
-    private static readonly Dictionary<int, _RefObjChar> RefObjChars = new();
-    private static readonly Dictionary<int, _RefSkill> RefSkills = new();
-    private static readonly Dictionary<int, _RefRegion> RefRegions = new();
-    private static readonly Dictionary<int, _RefQuest> RefQuests = new();
-    private static readonly Dictionary<int, _RefQuestReward> RefQuestRewards = new();
-    private static readonly Dictionary<int, _RefQuestRewardItem> RefQuestRewardItems = new();
-    private static readonly Dictionary<byte, _RefLevel> RefLevels = new();
+    private static readonly ConcurrentDictionary<int, _RefObjCommon> RefObjCommons = new();
+    private static readonly ConcurrentDictionary<int, _RefObjItem> RefObjItems = new();
+    private static readonly ConcurrentDictionary<int, _RefObjChar> RefObjChars = new();
+    private static readonly ConcurrentDictionary<int, _RefSkill> RefSkills = new();
+    private static readonly ConcurrentDictionary<int, _RefRegion> RefRegions = new();
+    private static readonly ConcurrentDictionary<int, _RefQuest> RefQuests = new();
+    private static readonly ConcurrentDictionary<int, _RefQuestReward> RefQuestRewards = new();
+    private static readonly ConcurrentDictionary<int, _RefQuestRewardItem> RefQuestRewardItems = new();
+    private static readonly ConcurrentDictionary<byte, _RefLevel> RefLevels = new();
 
-    private static readonly Dictionary<int, _Notice> Notices = new();
+    private static readonly ConcurrentDictionary<int, _Notice> Notices = new();
 
     public static async Task<_RefObjCommon?> GetRefObjCommonAsync(int id)
     {
-        if (RefObjCommons.TryGetValue(id, out var value)) return value;
+        if (RefObjCommons.TryGetValue(id, out var value))
+        {
+            return value;
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefObjCommons.FindAsync(id);
-        if (value != null) RefObjCommons[id] = value;
+        
+        if (value != null)
+        {
+            value = RefObjCommons.GetOrAdd(id, value);
+        }
 
         return value;
     }
@@ -39,7 +47,10 @@ public static class Cache
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefObjCommons.FirstOrDefaultAsync(predicate);
 
-        if (value != null) RefObjCommons[value.ID] = value;
+        if (value != null)
+        {
+            value = RefObjCommons.GetOrAdd(value.ID, value);
+        }
 
         return value;
     }
@@ -50,7 +61,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefObjItems.FindAsync(id);
-        if (value != null) RefObjItems[id] = value;
+        if (value != null)
+        {
+            value = RefObjItems.GetOrAdd(id, value);
+        }
 
         return value;
     }
@@ -63,8 +77,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefObjItems.FirstOrDefaultAsync(predicate);
-
-        if (value != null) RefObjItems[value.ID] = value;
+        if (value != null)
+        {
+            value = RefObjItems.GetOrAdd(value.ID, value);
+        }
 
         return value;
     }
@@ -75,7 +91,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefObjChars.FindAsync(id);
-        if (value != null) RefObjChars[id] = value;
+        if (value != null)
+        {
+            value = RefObjChars.GetOrAdd(id, value);
+        }
 
         return value;
     }
@@ -88,8 +107,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefObjChars.FirstOrDefaultAsync(predicate);
-
-        if (value != null) RefObjChars[value.ID] = value;
+        if (value != null)
+        {
+            value = RefObjChars.GetOrAdd(value.ID, value);
+        }
 
         return value;
     }
@@ -100,7 +121,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefSkills.FindAsync(id);
-        if (value != null) RefSkills[id] = value;
+        if (value != null)
+        {
+            value = RefSkills.GetOrAdd(id, value);
+        }
 
         return value;
     }
@@ -113,8 +137,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefSkills.FirstOrDefaultAsync(predicate);
-
-        if (value != null) RefSkills[value.ID] = value;
+        if (value != null)
+        {
+            value = RefSkills.GetOrAdd(value.ID, value);
+        }
 
         return value;
     }
@@ -125,8 +151,11 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefRegions.FindAsync(regionId);
-        if (value != null) RefRegions[regionId] = value;
-
+        if (value != null)
+        {
+            value = RefRegions.GetOrAdd(regionId, value);
+        }
+        
         return value;
     }
 
@@ -139,7 +168,10 @@ public static class Cache
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefRegions.FirstOrDefaultAsync(predicate);
 
-        if (value != null) RefRegions[value.wRegionID] = value;
+        if (value != null)
+        {
+            value = RefRegions.GetOrAdd(value.wRegionID, value);
+        }
 
         return value;
     }
@@ -150,7 +182,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefQuests.FindAsync(id);
-        if (value != null) RefQuests[id] = value;
+        if (value != null)
+        {
+            value = RefQuests.GetOrAdd(id, value);
+        }
 
         return value;
     }
@@ -163,8 +198,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefQuests.FirstOrDefaultAsync(predicate);
-
-        if (value != null) RefQuests[value.ID] = value;
+        if (value != null)
+        {
+            value = RefQuests.GetOrAdd(value.ID, value);
+        }
 
         return value;
     }
@@ -175,7 +212,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefQuestRewards.FindAsync(questId);
-        if (value != null) RefQuestRewards[questId] = value;
+        if (value != null)
+        {
+            value = RefQuestRewards.GetOrAdd(questId, value);
+        }
 
         return value;
     }
@@ -188,8 +228,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefQuestRewards.FirstOrDefaultAsync(predicate);
-
-        if (value != null) RefQuestRewards[value.QuestID] = value;
+        if (value != null)
+        {
+            value = RefQuestRewards.GetOrAdd(value.QuestID, value);
+        }
 
         return value;
     }
@@ -200,7 +242,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefQuestRewardItems.FindAsync(questId);
-        if (value != null) RefQuestRewardItems[questId] = value;
+        if (value != null)
+        {
+            value = RefQuestRewardItems.GetOrAdd(questId, value);
+        }
 
         return value;
     }
@@ -214,8 +259,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefQuestRewardItems.FirstOrDefaultAsync(predicate);
-
-        if (value != null) RefQuestRewardItems[value.QuestID] = value;
+        if (value != null)
+        {
+            value = RefQuestRewardItems.GetOrAdd(value.QuestID, value);
+        }
 
         return value;
     }
@@ -226,7 +273,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefLevels.FindAsync(level);
-        if (value != null) RefLevels[level] = value;
+        if (value != null)
+        {
+            value = RefLevels.GetOrAdd(level, value);
+        }
 
         return value;
     }
@@ -239,8 +289,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_SHARD();
         value = await db._RefLevels.FirstOrDefaultAsync(predicate);
-
-        if (value != null) RefLevels[value.Lvl] = value;
+        if (value != null)
+        {
+            value = RefLevels.GetOrAdd(value.Lvl, value);
+        }
 
         return value;
     }
@@ -251,7 +303,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_ACCOUNT();
         value = await db._Notices.FindAsync(id);
-        if (value != null) Notices[id] = value;
+        if (value != null)
+        {
+            value = Notices.GetOrAdd(id, value);
+        }
 
         return value;
     }
@@ -264,8 +319,10 @@ public static class Cache
 
         await using var db = new Context.SRO_VT_ACCOUNT();
         value = await db._Notices.FirstOrDefaultAsync(predicate);
-
-        if (value != null) Notices[value.ID] = value;
+        if (value != null)
+        {
+            value = Notices.GetOrAdd(value.ID, value);
+        }
 
         return value;
     }

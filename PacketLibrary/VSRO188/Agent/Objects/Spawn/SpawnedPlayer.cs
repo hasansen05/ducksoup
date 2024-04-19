@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Database.VSRO188;
 using Database.VSRO188.SRO_VT_SHARD;
 using PacketLibrary.VSRO188.Agent.Enums;
@@ -10,12 +11,12 @@ public sealed class SpawnedPlayer : SpawnedBionic
 {
     public ExpIcon AutoInverstExp;
     public byte AvatarInventorySize;
-    public Dictionary<_RefObjCommon, byte> Avatars;
+    public ConcurrentDictionary<_RefObjCommon, byte> Avatars;
     public SpawnedPlayerGuild Guild;
     public byte HwanLevel;
     public bool InCombat;
     public InteractMode InteractMode;
-    public Dictionary<_RefObjCommon, byte> Inventory;
+    public ConcurrentDictionary<_RefObjCommon, byte> Inventory;
     public byte InventorySize;
     public Job Job;
     public byte JobLevel;
@@ -44,7 +45,7 @@ public sealed class SpawnedPlayer : SpawnedBionic
         packet.TryRead(out InventorySize);
 
         packet.TryRead<byte>(out var itemCount);
-        Inventory = new Dictionary<_RefObjCommon, byte>();
+        Inventory = new ConcurrentDictionary<_RefObjCommon, byte>();
 
         for (var i = 0; i < itemCount; i++)
         {
@@ -64,11 +65,11 @@ public sealed class SpawnedPlayer : SpawnedBionic
             if (itemObj.TypeID2 == 1)
             {
                 packet.TryRead<byte>(out var optLevel);
-                Inventory.Add(itemObj, optLevel); //Item object and the "+" value as value
+                Inventory.TryAdd(itemObj, optLevel); //Item object and the "+" value as value
             }
         }
 
-        Avatars = new Dictionary<_RefObjCommon, byte>();
+        Avatars = new ConcurrentDictionary<_RefObjCommon, byte>();
 
         packet.TryRead(out AvatarInventorySize);
         packet.TryRead(out itemCount);
@@ -84,7 +85,7 @@ public sealed class SpawnedPlayer : SpawnedBionic
             }
 
             packet.TryRead<byte>(out var optLevel);
-            Avatars.Add(itemObj, optLevel); //Item object and the "+" value as value
+            Avatars.TryAdd(itemObj, optLevel); //Item object and the "+" value as value
         }
 
 

@@ -36,88 +36,100 @@ public class EntityParsingHandler
 
     private async Task<Packet> CosInfo(SERVER_COS_INFO data, ISession session)
     {
-        data.TryRead(out uint uniqueId)
-            .TryRead(out uint objectId);
-
-        var objCommon = await Cache.GetRefObjCommonAsync((int)objectId);
-        if (objCommon == null)
+        try
         {
-            return data;
-        }
+            data.TryRead(out uint uniqueId)
+                .TryRead(out uint objectId);
 
-        var objChar = await Cache.GetRefObjCharAsync(objCommon.Link);
-        if (objChar == null)
-        {
-            return data;
-        }
-
-        if (objCommon.TypeID2 == 2 && objCommon.TypeID3 == 3)
-        {
-            data.TryRead(out int hp)
-                .TryRead(out int maxHp);
-            maxHp = maxHp != 0 && maxHp != 200 ? maxHp : objChar.MaxHP;
-
-            switch (objCommon.TypeID4)
+            var objCommon = await Cache.GetRefObjCommonAsync((int)objectId);
+            if (objCommon == null)
             {
-                case 1:
-                    session.SetData(Data.Transport, new Transport
-                    {
-                        Id = objectId,
-                        UniqueId = uniqueId,
-                        Health = hp,
-                        MaxHealth = maxHp,
-                    });
-                    break;
-                case 2:
-                    var jobTransport = new JobTransport
-                    {
-                        Id = objectId,
-                        UniqueId = uniqueId,
-                        Health = hp,
-                        MaxHealth = maxHp,
-                        Inventory = new InventoryItemCollection(data),
-                    };
-                    data.TryRead(out jobTransport.OwnerUniqueId);
-                    session.SetData(Data.JobTransport, jobTransport);
-                    break;
-                case 3:
-                    var growth = new Growth
-                    {
-                        Id = objectId,
-                        UniqueId = uniqueId,
-                        Health = hp,
-                        MaxHealth = maxHp,
-                    };
-                    growth.Deserialize(data);
-                    session.SetData(Data.Growth, growth);
-                    break;
-                case 4:
-                    var ability = new Ability
-                    {
-                        Id = objectId,
-                        UniqueId = uniqueId,
-                        Health = hp,
-                        MaxHealth = maxHp,
-                    };
-                    // TODO :: 
-                    // ability.Deserialize(data);
-                    session.SetData(Data.AbilityPet, ability);
-                    break;
-                case 9:
-                    var fellow = new Fellow()
-                    {
-                        Id = objectId,
-                        UniqueId = uniqueId,
-                        Health = hp,
-                        MaxHealth = maxHp,
-                    };
-                    // TODO :: 
-                    // fellow.Deserialize(data);
-                    session.SetData(Data.Fellow, fellow);
-                    break;
+                return data;
+            }
+
+            var objChar = await Cache.GetRefObjCharAsync(objCommon.Link);
+            if (objChar == null)
+            {
+                return data;
+            }
+
+            if (objCommon.TypeID2 == 2 && objCommon.TypeID3 == 3)
+            {
+                data.TryRead(out int hp)
+                    .TryRead(out int maxHp);
+                maxHp = maxHp != 0 && maxHp != 200 ? maxHp : objChar.MaxHP;
+
+                switch (objCommon.TypeID4)
+                {
+                    case 1:
+                        session.SetData(Data.Transport, new Transport
+                        {
+                            Id = objectId,
+                            UniqueId = uniqueId,
+                            Health = hp,
+                            MaxHealth = maxHp,
+                        });
+                        break;
+                    case 2:
+                        var jobTransport = new JobTransport
+                        {
+                            Id = objectId,
+                            UniqueId = uniqueId,
+                            Health = hp,
+                            MaxHealth = maxHp,
+                            Inventory = new InventoryItemCollection(data),
+                        };
+                        data.TryRead(out jobTransport.OwnerUniqueId);
+                        session.SetData(Data.JobTransport, jobTransport);
+                        break;
+                    case 3:
+                        var growth = new Growth
+                        {
+                            Id = objectId,
+                            UniqueId = uniqueId,
+                            Health = hp,
+                            MaxHealth = maxHp,
+                        };
+                        growth.Deserialize(data);
+                        session.SetData(Data.Growth, growth);
+                        break;
+                    case 4:
+                        var ability = new Ability
+                        {
+                            Id = objectId,
+                            UniqueId = uniqueId,
+                            Health = hp,
+                            MaxHealth = maxHp,
+                        };
+                        // TODO :: 
+                        // ability.Deserialize(data);
+                        session.SetData(Data.AbilityPet, ability);
+                        break;
+                    case 9:
+                        var fellow = new Fellow()
+                        {
+                            Id = objectId,
+                            UniqueId = uniqueId,
+                            Health = hp,
+                            MaxHealth = maxHp,
+                        };
+                        // TODO :: 
+                        // fellow.Deserialize(data);
+                        session.SetData(Data.Fellow, fellow);
+                        break;
+                }
             }
         }
-
+        catch (Exception exception)
+        {
+            session.GetData(Data.CharInfo, out ICharInfo charInfo, null);
+            session.GetData(Data.CharId, out int charId, -1);
+            Log.Error("EntityParsingHandler | Name: {0} | Id: {1}", (charInfo != null? charInfo.CharName : "null"), charId);
+            Log.Error("EntityParsingHandler | {0}", exception.Message);
+            Log.Error("EntityParsingHandler | {0}", exception.StackTrace);
+            Log.Error("EntityParsingHandler | {0}", exception.InnerException);
+            Log.Error("EntityParsingHandler | {0}", exception.Data);
+        }
         return data;
     }
 

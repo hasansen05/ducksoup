@@ -6,11 +6,11 @@ namespace PacketLibrary.VSRO188.Agent.Objects.Inventory;
 // https://github.com/SDClowen/RSBot/
 public class InventoryItemCollection : IEnumerable
 {
-    protected List<InventoryItem> _collection;
+    private readonly List<InventoryItem> _collection = new List<InventoryItem>();
 
     public InventoryItemCollection(byte size)
     {
-        _collection = new List<InventoryItem>(size + 1);
+        _collection = new List<InventoryItem>();
     }
 
     public InventoryItemCollection(Packet packet)
