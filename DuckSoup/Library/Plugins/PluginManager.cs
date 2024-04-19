@@ -117,7 +117,7 @@ public class PluginManager : IPluginManager
 
         foreach (var folder in Directory.GetDirectories(directory))
         {
-            var pluginFolder = $"{directory}\\{pluginName}";
+            var pluginFolder = $"{directory}{Path.DirectorySeparatorChar}{pluginName}";
             if (folder.ToLower().Equals(pluginFolder.ToLower())) return folder;
         }
 
@@ -182,7 +182,7 @@ public class PluginManager : IPluginManager
             var tempPlugin = LoadPlugin(folder, true);
             if (tempPlugin == null) continue;
             temp.Add(tempPlugin);
-            Log.Information("Plugin from folder: {0} loaded.", folder.Replace("\\plugins", ""));
+            Log.Information("Plugin from folder: {0} loaded.", folder.Replace(Path.DirectorySeparatorChar + "plugins", ""));
         }
 
         Log.Information("Starting plugins..");
