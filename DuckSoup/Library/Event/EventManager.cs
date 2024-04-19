@@ -43,7 +43,7 @@ public class EventManager : IEventManager
 
     public PluginLoader LoadEvent(string file)
     {
-        return PluginLoader.CreateFromAssemblyFile(Directory.GetCurrentDirectory() + "\\" + file,
+        return PluginLoader.CreateFromAssemblyFile(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + file,
             config =>
             {
                 config.IsUnloadable = true;
