@@ -91,7 +91,7 @@ public class FakeClient : TcpClient
         }
         catch (Exception exception)
         {
-            Session.GetData(Data.CharInfo, out ICharInfo charInfo, null);
+            Session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             Session.GetData(Data.CharId, out int charId, -1);
             Log.Error("FakeClient Recv | 0x{0:X} | Name: {1} | Id: {2} | ServerType: {3} ", message, (charInfo != null? charInfo.CharName : "null"), charId, FakeServer.Service.ServerType);
             Log.Error("FakeClient Recv | {0}", exception.Message);

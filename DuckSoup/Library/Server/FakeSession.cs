@@ -26,11 +26,24 @@ public class FakeSession : TcpSession
         ClientSecurity = Utility.GetSecurity(service.SecurityType);
         ClientSecurity.GenerateSecurity(true, true, true);
 
-        var fakeRemoteClient = new FakeClient(server, service);
-        fakeRemoteClient.ConnectAsync();
+        try
+        {
+            var fakeRemoteClient = new FakeClient(server, service);
+            fakeRemoteClient.ConnectAsync();
+            
+            Session = new DuckSession(this, fakeRemoteClient);
+            fakeRemoteClient.Session = Session;
+        }
+        catch (Exception exception)
+        {
+            Log.Error("FakeSession | Could not establish remote client");
+            Log.Error("FakeSession | {0}", exception.Message);
+            Log.Error("FakeSession | {0}", exception.StackTrace);
+            Log.Error("FakeSession | {0}", exception.InnerException);
+            Log.Error("FakeSession | {0}", exception.Data);
+            base.Disconnect();
+        }
 
-        Session = new DuckSession(this, fakeRemoteClient);
-        fakeRemoteClient.Session = Session;
     }
 
     public ISession Session { get; }
@@ -115,7 +128,7 @@ public class FakeSession : TcpSession
         }
         catch (Exception exception)
         {
-            Session.GetData(Data.CharInfo, out ICharInfo charInfo, null);
+            Session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             Session.GetData(Data.CharId, out int charId, -1);
             Log.Error("FakeSession Recv | 0x{0:X} | Name: {1} | Id: {2} | ServerType: {3} ", message, (charInfo != null? charInfo.CharName : "null"), charId, FakeServer.Service.ServerType);
             Log.Error("FakeSession Recv | {0}", exception.Message);
