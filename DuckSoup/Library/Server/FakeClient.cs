@@ -22,7 +22,7 @@ public class FakeClient : TcpClient
         FakeServer = fakeServer;
     }
 
-    public ISession Session { get; internal set; }
+    public ISession? Session { get; internal set; }
     private ISecurity ServerSecurity { get; }
     private FakeServer FakeServer { get; }
 
@@ -33,12 +33,22 @@ public class FakeClient : TcpClient
 
     protected override void OnDisconnected()
     {
+        if (Session == null)
+        {
+            return;
+        }
+        
         Log.Debug($"FakeRemoteClient disconnected a session with Id {Id}");
         Session.Disconnect();
     }
 
     protected override void OnError(SocketError error)
     {
+        if (Session == null)
+        {
+            return;
+        }
+        
         Log.Debug($"FakeRemoteClient caught an error with code {error}");
         Session.Disconnect();
     }
@@ -47,6 +57,11 @@ public class FakeClient : TcpClient
     // S -> P -> C
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
+        if (Session == null)
+        {
+            return;
+        }
+        
         string message = string.Empty;
         try
         {

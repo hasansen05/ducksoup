@@ -46,18 +46,28 @@ public class FakeSession : TcpSession
 
     }
 
-    public ISession Session { get; }
+    public ISession? Session { get; }
     private ISecurity ClientSecurity { get; }
     private FakeServer FakeServer { get; }
 
     protected override void OnConnected()
     {
+        if (Session == null)
+        {
+            return;
+        }
+        
         Log.Debug($"FakeSession connected with Id {Id} connected!");
         FakeServer.AddSession(Session);
     }
 
     protected override void OnDisconnected()
     {
+        if (Session == null)
+        {
+            return;
+        }
+        
         FakeServer.RemoveSession(Session);
         Log.Debug($"FakeSession disconnected with Id {Id} disconnected!");
         Session.Disconnect();
@@ -65,6 +75,11 @@ public class FakeSession : TcpSession
 
     protected override void OnError(SocketError error)
     {
+        if (Session == null)
+        {
+            return;
+        }
+        
         Console.WriteLine($"FakeSession caught an error with code {error}");
         Session.Disconnect();
     }
@@ -73,6 +88,11 @@ public class FakeSession : TcpSession
     // C -> P -> S
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
+        if (Session == null)
+        {
+            return;
+        }
+        
         Session.GetData(Data.CrcFailure, out var crc, 0);
         if (crc > 5)
         {
