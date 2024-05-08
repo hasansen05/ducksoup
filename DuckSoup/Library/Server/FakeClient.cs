@@ -87,7 +87,7 @@ public class FakeClient : TcpClient
                     case PacketResultType.Block:
                         // TODO :: Temporary for testing purp.
                         // Session.SendToClient(packetResult);
-                        Console.WriteLine($"Server Packet: 0x{packet.MsgId:X} is perhaps not on whitelist!");
+                        Log.Debug($"Server Packet: 0x{packet.MsgId:X} is perhaps not on whitelist!");
                         break;
                     case PacketResultType.Disconnect:
                         // Console.WriteLine($"Packet: 0x{packet.MsgId:X} is on blacklist!");
