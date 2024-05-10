@@ -8,31 +8,47 @@ namespace Database.VSRO188;
 
 public static class Cache
 {
-    private static readonly ConcurrentDictionary<int, _RefObjCommon> RefObjCommons = new();
-    private static readonly ConcurrentDictionary<int, _RefObjItem> RefObjItems = new();
-    private static readonly ConcurrentDictionary<int, _RefObjChar> RefObjChars = new();
-    private static readonly ConcurrentDictionary<int, _RefSkill> RefSkills = new();
-    private static readonly ConcurrentDictionary<int, _RefRegion> RefRegions = new();
-    private static readonly ConcurrentDictionary<int, _RefQuest> RefQuests = new();
-    private static readonly ConcurrentDictionary<int, _RefQuestReward> RefQuestRewards = new();
-    private static readonly ConcurrentDictionary<int, _RefQuestRewardItem> RefQuestRewardItems = new();
-    private static readonly ConcurrentDictionary<byte, _RefLevel> RefLevels = new();
+    private static readonly Dictionary<int, _RefObjCommon> RefObjCommons = new();
+    private static readonly Dictionary<int, _RefObjItem> RefObjItems = new();
+    private static readonly Dictionary<int, _RefObjChar> RefObjChars = new();
+    private static readonly Dictionary<int, _RefSkill> RefSkills = new();
+    private static readonly Dictionary<int, _RefRegion> RefRegions = new();
+    private static readonly Dictionary<int, _RefQuest> RefQuests = new();
+    private static readonly Dictionary<int, _RefQuestReward> RefQuestRewards = new();
+    private static readonly Dictionary<int, _RefQuestRewardItem> RefQuestRewardItems = new();
+    private static readonly Dictionary<byte, _RefLevel> RefLevels = new();
 
-    private static readonly ConcurrentDictionary<int, _Notice> Notices = new();
+    private static readonly Dictionary<int, _Notice> Notices = new();
 
+    public static void FillCache() {
+        using var shard = new Context.SRO_VT_SHARD();
+        shard._RefObjCommons.AsNoTracking().ForEachAsync((entry) => { RefObjCommons.TryAdd(entry.ID, entry); });
+        shard._RefObjItems.AsNoTracking().ForEachAsync((entry) => { RefObjItems.TryAdd(entry.ID, entry); });
+        shard._RefObjChars.AsNoTracking().ForEachAsync((entry) => { RefObjChars.TryAdd(entry.ID, entry); });
+        shard._RefSkills.AsNoTracking().ForEachAsync((entry) => { RefSkills.TryAdd(entry.ID, entry); });
+        shard._RefRegions.AsNoTracking().ForEachAsync((entry) => { RefRegions.TryAdd(entry.wRegionID, entry); });
+        shard._RefQuests.AsNoTracking().ForEachAsync((entry) => { RefQuests.TryAdd(entry.ID, entry); });
+        shard._RefQuestRewards.AsNoTracking().ForEachAsync((entry) => { RefQuestRewards.TryAdd(entry.QuestID, entry); });
+        shard._RefQuestRewardItems.AsNoTracking().ForEachAsync((entry) => { RefQuestRewardItems.TryAdd(entry.QuestID, entry); });
+        shard._RefLevels.AsNoTracking().ForEachAsync((entry) => { RefLevels.TryAdd(entry.Lvl, entry); });
+             
+        using var account = new Context.SRO_VT_ACCOUNT();
+        account._Notices.ForEachAsync((entry) => { Notices.TryAdd(entry.ID, entry); });
+    }
+    
     public static async Task<_RefObjCommon?> GetRefObjCommonAsync(int id)
     {
-        if (RefObjCommons.TryGetValue(id, out var value))
+        if (RefObjCommons.ContainsKey(id))
         {
-            return value;
+            return RefObjCommons[id];
         }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefObjCommons.FindAsync(id);
+        var value = await db._RefObjCommons.AsNoTracking().FirstOrDefaultAsync(entry => entry.ID == id);
         
         if (value != null)
         {
-            value = RefObjCommons.GetOrAdd(id, value);
+            RefObjCommons.TryAdd(id, value);
         }
 
         return value;
@@ -40,16 +56,16 @@ public static class Cache
 
     public static async Task<_RefObjCommon?> GetRefObjCommonAsync(Expression<Func<_RefObjCommon, bool>> predicate)
     {
-        var value = RefObjCommons.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefObjCommons.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefObjCommons.FirstOrDefaultAsync(predicate);
+        value = await db._RefObjCommons.AsNoTracking().FirstOrDefaultAsync(predicate);
 
         if (value != null)
         {
-            value = RefObjCommons.GetOrAdd(value.ID, value);
+            RefObjCommons.TryAdd(value.ID, value);
         }
 
         return value;
@@ -57,13 +73,17 @@ public static class Cache
 
     public static async Task<_RefObjItem?> GetRefObjItemAsync(int id)
     {
-        if (RefObjItems.TryGetValue(id, out var value)) return value;
+        if (RefObjItems.ContainsKey(id))
+        {
+            return RefObjItems[id];
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefObjItems.FindAsync(id);
+        var value = await db._RefObjItems.AsNoTracking().FirstOrDefaultAsync(entry => entry.ID == id);
+        
         if (value != null)
         {
-            value = RefObjItems.GetOrAdd(id, value);
+            RefObjItems.TryAdd(id, value);
         }
 
         return value;
@@ -71,15 +91,15 @@ public static class Cache
 
     public static async Task<_RefObjItem?> GetRefObjItemAsync(Expression<Func<_RefObjItem, bool>> predicate)
     {
-        var value = RefObjItems.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefObjItems.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefObjItems.FirstOrDefaultAsync(predicate);
+        value = await db._RefObjItems.AsNoTracking().FirstOrDefaultAsync(predicate);
         if (value != null)
         {
-            value = RefObjItems.GetOrAdd(value.ID, value);
+            RefObjItems.TryAdd(value.ID, value);
         }
 
         return value;
@@ -87,13 +107,17 @@ public static class Cache
 
     public static async Task<_RefObjChar?> GetRefObjCharAsync(int id)
     {
-        if (RefObjChars.TryGetValue(id, out var value)) return value;
+        if (RefObjChars.ContainsKey(id))
+        {
+            return RefObjChars[id];
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefObjChars.FindAsync(id);
+        var value = await db._RefObjChars.AsNoTracking().FirstOrDefaultAsync(entry => entry.ID == id);
+        
         if (value != null)
         {
-            value = RefObjChars.GetOrAdd(id, value);
+            RefObjChars.TryAdd(id, value);
         }
 
         return value;
@@ -101,15 +125,15 @@ public static class Cache
 
     public static async Task<_RefObjChar?> GetRefObjCharAsync(Expression<Func<_RefObjChar, bool>> predicate)
     {
-        var value = RefObjChars.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefObjChars.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefObjChars.FirstOrDefaultAsync(predicate);
+        value = await db._RefObjChars.AsNoTracking().FirstOrDefaultAsync(predicate);
         if (value != null)
         {
-            value = RefObjChars.GetOrAdd(value.ID, value);
+            RefObjChars.TryAdd(value.ID, value);
         }
 
         return value;
@@ -117,13 +141,17 @@ public static class Cache
 
     public static async Task<_RefSkill?> GetRefSkillAsync(int id)
     {
-        if (RefSkills.TryGetValue(id, out var value)) return value;
+        if (RefSkills.ContainsKey(id))
+        {
+            return RefSkills[id];
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefSkills.FindAsync(id);
+        var value = await db._RefSkills.AsNoTracking().FirstOrDefaultAsync(entry => entry.ID == id);
+        
         if (value != null)
         {
-            value = RefSkills.GetOrAdd(id, value);
+            RefSkills.TryAdd(id, value);
         }
 
         return value;
@@ -131,15 +159,15 @@ public static class Cache
 
     public static async Task<_RefSkill?> GetRefSkillAsync(Expression<Func<_RefSkill, bool>> predicate)
     {
-        var value = RefSkills.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefSkills.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefSkills.FirstOrDefaultAsync(predicate);
+        value = await db._RefSkills.AsNoTracking().FirstOrDefaultAsync(predicate);
         if (value != null)
         {
-            value = RefSkills.GetOrAdd(value.ID, value);
+            RefSkills.TryAdd(value.ID, value);
         }
 
         return value;
@@ -147,30 +175,34 @@ public static class Cache
 
     public static async Task<_RefRegion?> GetRefRegionAsync(int regionId)
     {
-        if (RefRegions.TryGetValue(regionId, out var value)) return value;
+        if (RefRegions.ContainsKey(regionId))
+        {
+            return RefRegions[regionId];
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefRegions.FindAsync(regionId);
+        var value = await db._RefRegions.AsNoTracking().FirstOrDefaultAsync(entry => entry.wRegionID == regionId);
+        
         if (value != null)
         {
-            value = RefRegions.GetOrAdd(regionId, value);
+            RefRegions.TryAdd(regionId, value);
         }
-        
+
         return value;
     }
 
     public static async Task<_RefRegion?> GetRefRegionAsync(Expression<Func<_RefRegion, bool>> predicate)
     {
-        var value = RefRegions.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefRegions.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefRegions.FirstOrDefaultAsync(predicate);
+        value = await db._RefRegions.AsNoTracking().FirstOrDefaultAsync(predicate);
 
         if (value != null)
         {
-            value = RefRegions.GetOrAdd(value.wRegionID, value);
+            RefRegions.TryAdd(value.wRegionID, value);
         }
 
         return value;
@@ -178,13 +210,16 @@ public static class Cache
 
     public static async Task<_RefQuest?> GetRefQuestAsync(int id)
     {
-        if (RefQuests.TryGetValue(id, out var value)) return value;
+        if (RefQuests.ContainsKey(id))
+        {
+            return RefQuests[id];
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefQuests.FindAsync(id);
+        var value = await db._RefQuests.FindAsync(id);
         if (value != null)
         {
-            value = RefQuests.GetOrAdd(id, value);
+            RefQuests.TryAdd(id, value);
         }
 
         return value;
@@ -192,15 +227,15 @@ public static class Cache
 
     public static async Task<_RefQuest?> GetRefQuestAsync(Expression<Func<_RefQuest, bool>> predicate)
     {
-        var value = RefQuests.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefQuests.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefQuests.FirstOrDefaultAsync(predicate);
+        value = await db._RefQuests.AsNoTracking().FirstOrDefaultAsync(predicate);
         if (value != null)
         {
-            value = RefQuests.GetOrAdd(value.ID, value);
+            RefQuests.TryAdd(value.ID, value);
         }
 
         return value;
@@ -208,13 +243,16 @@ public static class Cache
 
     public static async Task<_RefQuestReward?> GetRefQuestRewardAsync(int questId)
     {
-        if (RefQuestRewards.TryGetValue(questId, out var value)) return value;
+        if (RefQuestRewards.ContainsKey(questId))
+        {
+            return RefQuestRewards[questId];
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefQuestRewards.FindAsync(questId);
+        var value = await db._RefQuestRewards.FindAsync(questId);
         if (value != null)
         {
-            value = RefQuestRewards.GetOrAdd(questId, value);
+            RefQuestRewards.TryAdd(questId, value);
         }
 
         return value;
@@ -222,15 +260,15 @@ public static class Cache
 
     public static async Task<_RefQuestReward?> GetRefQuestRewardAsync(Expression<Func<_RefQuestReward, bool>> predicate)
     {
-        var value = RefQuestRewards.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefQuestRewards.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefQuestRewards.FirstOrDefaultAsync(predicate);
+        value = await db._RefQuestRewards.AsNoTracking().FirstOrDefaultAsync(predicate);
         if (value != null)
         {
-            value = RefQuestRewards.GetOrAdd(value.QuestID, value);
+            RefQuestRewards.TryAdd(value.QuestID, value);
         }
 
         return value;
@@ -238,13 +276,16 @@ public static class Cache
 
     public static async Task<_RefQuestRewardItem?> GetRefQuestRewardItemAsync(int questId)
     {
-        if (RefQuestRewardItems.TryGetValue(questId, out var value)) return value;
+        if (RefQuestRewardItems.ContainsKey(questId))
+        {
+            return RefQuestRewardItems[questId];
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefQuestRewardItems.FindAsync(questId);
+        var value = await db._RefQuestRewardItems.FindAsync(questId);
         if (value != null)
         {
-            value = RefQuestRewardItems.GetOrAdd(questId, value);
+            RefQuestRewardItems.TryAdd(questId, value);
         }
 
         return value;
@@ -253,15 +294,15 @@ public static class Cache
     public static async Task<_RefQuestRewardItem?> GetRefQuestRewardItemAsync(
         Expression<Func<_RefQuestRewardItem, bool>> predicate)
     {
-        var value = RefQuestRewardItems.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefQuestRewardItems.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefQuestRewardItems.FirstOrDefaultAsync(predicate);
+        value = await db._RefQuestRewardItems.AsNoTracking().FirstOrDefaultAsync(predicate);
         if (value != null)
         {
-            value = RefQuestRewardItems.GetOrAdd(value.QuestID, value);
+            RefQuestRewardItems.TryAdd(value.QuestID, value);
         }
 
         return value;
@@ -269,13 +310,17 @@ public static class Cache
 
     public static async Task<_RefLevel?> GetRefLevelAsync(byte level)
     {
-        if (RefLevels.TryGetValue(level, out var value)) return value;
+        if (RefLevels.ContainsKey(level))
+        {
+            return RefLevels[level];
+        }
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefLevels.FindAsync(level);
+        var value = await db._RefLevels.AsNoTracking().FirstOrDefaultAsync(entry => entry.Lvl == level);
+        
         if (value != null)
         {
-            value = RefLevels.GetOrAdd(level, value);
+            RefLevels.TryAdd(level, value);
         }
 
         return value;
@@ -283,15 +328,15 @@ public static class Cache
 
     public static async Task<_RefLevel?> GetRefLevelAsync(Expression<Func<_RefLevel, bool>> predicate)
     {
-        var value = RefLevels.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = RefLevels.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_SHARD();
-        value = await db._RefLevels.FirstOrDefaultAsync(predicate);
+        value = await db._RefLevels.AsNoTracking().FirstOrDefaultAsync(predicate);
         if (value != null)
         {
-            value = RefLevels.GetOrAdd(value.Lvl, value);
+            RefLevels.TryAdd(value.Lvl, value);
         }
 
         return value;
@@ -299,13 +344,16 @@ public static class Cache
 
     public static async Task<_Notice?> GetNoticeAsync(int id)
     {
-        if (Notices.TryGetValue(id, out var value)) return value;
+        if (Notices.ContainsKey(id))
+        {
+            return Notices[id];
+        }
 
         await using var db = new Context.SRO_VT_ACCOUNT();
-        value = await db._Notices.FindAsync(id);
+        var value = await db._Notices.FindAsync(id);
         if (value != null)
         {
-            value = Notices.GetOrAdd(id, value);
+            Notices.TryAdd(id, value);
         }
 
         return value;
@@ -313,15 +361,15 @@ public static class Cache
 
     public static async Task<_Notice?> GetNoticeAsync(Expression<Func<_Notice, bool>> predicate)
     {
-        var value = Notices.Values.AsQueryable().FirstOrDefault(predicate.Compile());
+        var value = Notices.Values.AsQueryable().AsNoTracking().FirstOrDefault(predicate.Compile());
 
         if (value != null) return value;
 
         await using var db = new Context.SRO_VT_ACCOUNT();
-        value = await db._Notices.FirstOrDefaultAsync(predicate);
+        value = await db._Notices.AsNoTracking().FirstOrDefaultAsync(predicate);
         if (value != null)
         {
-            value = Notices.GetOrAdd(value.ID, value);
+            Notices.TryAdd(value.ID, value);
         }
 
         return value;
@@ -330,12 +378,12 @@ public static class Cache
     public static async Task<_Char?> GetCharAsync(int charId)
     {
         await using var db = new Context.SRO_VT_SHARD();
-        return await db._Chars.FirstOrDefaultAsync(c => c.CharID == charId);
+        return await db._Chars.AsNoTracking().FirstOrDefaultAsync(c => c.CharID == charId);
     }
 
     public static async Task<_Char?> GetCharAsync(Expression<Func<_Char, bool>> predicate)
     {
         await using var db = new Context.SRO_VT_SHARD();
-        return await db._Chars.FirstOrDefaultAsync(predicate);
+        return await db._Chars.AsNoTracking().FirstOrDefaultAsync(predicate);
     }
 }

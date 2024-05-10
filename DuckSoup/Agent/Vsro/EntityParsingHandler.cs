@@ -18,11 +18,11 @@ public class EntityParsingHandler
 {
     public EntityParsingHandler(IPacketHandler packetHandler)
     {
-        packetHandler.RegisterModuleHandler<SERVER_ENTITY_SPAWN>(EntitySingleSpawn);
-        packetHandler.RegisterModuleHandler<SERVER_ENTITY_DESPAWN>(EntitySingleDespawn);
-        packetHandler.RegisterModuleHandler<SERVER_ENTITY_GROUPSPAWN_BEGIN>(EntityGroupSpawnBegin);
-        packetHandler.RegisterModuleHandler<SERVER_ENTITY_GROUPSPAWN_END>(EntityGroupSpawnEnd);
-        packetHandler.RegisterModuleHandler<SERVER_ENTITY_GROUPSPAWN_DATA>(EntityGroupSpawnData);
+        // packetHandler.RegisterModuleHandler<SERVER_ENTITY_SPAWN>(EntitySingleSpawn);
+        // packetHandler.RegisterModuleHandler<SERVER_ENTITY_DESPAWN>(EntitySingleDespawn);
+        // packetHandler.RegisterModuleHandler<SERVER_ENTITY_GROUPSPAWN_BEGIN>(EntityGroupSpawnBegin);
+        // packetHandler.RegisterModuleHandler<SERVER_ENTITY_GROUPSPAWN_END>(EntityGroupSpawnEnd);
+        // packetHandler.RegisterModuleHandler<SERVER_ENTITY_GROUPSPAWN_DATA>(EntityGroupSpawnData);
 
         packetHandler.RegisterModuleHandler<SERVER_CHARACTER_DATA_BEGIN>(CharacterDataBegin);
         packetHandler.RegisterModuleHandler<SERVER_CHARACTER_DATA>(CharacterData);

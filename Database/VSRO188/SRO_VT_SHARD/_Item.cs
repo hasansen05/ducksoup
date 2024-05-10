@@ -1,4 +1,6 @@
-﻿namespace Database.VSRO188.SRO_VT_SHARD;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Database.VSRO188.SRO_VT_SHARD;
 
 public class _Item
 {
@@ -48,7 +50,7 @@ public class _Item
         if (_refObjCommon != null) return _refObjCommon;
 
         using var db = new Context.SRO_VT_SHARD();
-        _refObjCommon = db._RefObjCommons.FirstOrDefault(c => RefItemID == c.ID);
+        _refObjCommon = db._RefObjCommons.AsNoTracking().FirstOrDefault(c => RefItemID == c.ID);
         return _refObjCommon;
     }
 }

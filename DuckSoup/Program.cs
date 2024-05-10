@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Threading;
 using API.Command;
 using API.Server;
 using API.ServiceFactory;
@@ -30,6 +31,7 @@ public static class Program
 
     private static void Main()
     {
+        
         LoggingLevelSwitch.MinimumLevel = LogEventLevel.Debug; 
 
         Log.Logger = new LoggerConfiguration()

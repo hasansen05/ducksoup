@@ -2,6 +2,7 @@
 using API.ServiceFactory;
 using API.Settings;
 using Database;
+using Database.VSRO188;
 using Database.VSRO188.Context;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -29,6 +30,8 @@ public class DatabaseManager
         {
             using var context = new API.Database.Context.DuckSoup();
             context.Database.Migrate();
+            
+            // Cache.FillCache();
         }
         catch (Exception ex)
         {
