@@ -31,7 +31,7 @@ public class DatabaseManager
             using var context = new API.Database.Context.DuckSoup();
             context.Database.Migrate();
             
-            // Cache.FillCache();
+            Cache.FillCache();
         }
         catch (Exception ex)
         {
