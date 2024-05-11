@@ -164,13 +164,26 @@ public class VSRO188_AgentServer : FakeServer
     
     public override void AddSession(ISession session)
     {
-        base.AddSession(session);
-        _sharedObjects.AgentSessions.Add(session);
+        try
+        {
+            base.AddSession(session);
+            _sharedObjects.AgentSessions.Add(session);
+        }
+        catch (Exception exception)
+        {
+            Log.Error("{0}", exception.ToString());
+        }
     }
 
     public override void RemoveSession(ISession session)
     {
-        base.RemoveSession(session);
-        if (_sharedObjects.AgentSessions.Contains(session)) _sharedObjects.AgentSessions.Remove(session);
+        try {
+            base.RemoveSession(session);
+            if (_sharedObjects.AgentSessions.Contains(session)) _sharedObjects.AgentSessions.Remove(session);
+        }
+        catch (Exception exception)
+        {
+            Log.Error("{0}", exception.ToString());
+        }
     }
 }

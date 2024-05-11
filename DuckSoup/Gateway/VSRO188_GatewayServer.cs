@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using API;
 using API.Database.DuckSoup;
@@ -7,6 +8,7 @@ using API.ServiceFactory;
 using DuckSoup.Library.Server;
 using PacketLibrary.Handler;
 using PacketLibrary.VSRO188.Gateway.Server;
+using Serilog;
 using SilkroadSecurityAPI.Message;
 
 namespace DuckSoup.Gateway;
@@ -34,14 +36,28 @@ public class VSRO188_GatewayServer : FakeServer
 
     public override void AddSession(ISession session)
     {
-        base.AddSession(session);
-        _sharedObjects.GatewaySessions.Add(session);
-    }
+        try
+        {
+            base.AddSession(session);
+            _sharedObjects.GatewaySessions.Add(session);
+        }
+        catch (Exception exception)
+        {
+            Log.Error("{0}", exception.ToString());
+        }
+    } 
 
     public override void RemoveSession(ISession session)
     {
-        base.RemoveSession(session);
-        if (_sharedObjects.GatewaySessions.Contains(session)) _sharedObjects.GatewaySessions.Remove(session);
+        try
+        {
+            base.RemoveSession(session);
+            if (_sharedObjects.GatewaySessions.Contains(session)) _sharedObjects.GatewaySessions.Remove(session);
+        }
+        catch (Exception exception)
+        {
+            Log.Error("{0}", exception.ToString());
+        }
     }
 
     private async Task<Packet> SERVER_GATEWAY_LOGIN_RESPONSE(SERVER_GATEWAY_LOGIN_RESPONSE data, ISession session)
