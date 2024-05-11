@@ -1,4 +1,5 @@
 ﻿using API.Session;
+using LanguageExt;
 using PacketLibrary.Handler;
 using Serilog;
 using SilkroadSecurityAPI.Message;
@@ -10,7 +11,7 @@ public static class Helper
     public static Task<ISession?> GetSessionByUniqueId(uint uniqueId)
     {
         var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
-        return Task.FromResult(sharedObjects.AgentSessions.FirstOrDefault(session =>
+        return Task.FromResult(new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions).FirstOrDefault(session =>
         {
             session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             if (charInfo == null) return false;
@@ -21,13 +22,13 @@ public static class Helper
     public static Task<ISession?> GetSessionByGuid(Guid guid)
     {
         var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
-        return Task.FromResult(sharedObjects.AgentSessions.FirstOrDefault(session => session.Guid.Equals(guid)));
+        return Task.FromResult(new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions).FirstOrDefault(session => session.Guid.Equals(guid)));
     }
 
     public static Task<ISession?> GetSessionByCharName(string charName)
     {
         var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
-        return Task.FromResult(sharedObjects.AgentSessions.FirstOrDefault(session =>
+        return Task.FromResult(new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions).FirstOrDefault(session =>
         {
             session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             if (charInfo == null) return false;
@@ -38,7 +39,7 @@ public static class Helper
     public static Task<ISession?> GetSessionByAccountJid(int accountJid)
     {
         var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
-        return Task.FromResult(sharedObjects.AgentSessions.FirstOrDefault(session =>
+        return Task.FromResult(new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions).FirstOrDefault(session =>
         {
             session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             if (charInfo == null) return false;
@@ -49,7 +50,7 @@ public static class Helper
     public static Task<List<ISession>> GetSessionsInRegion(int regionId)
     {
         var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
-        var result = sharedObjects.AgentSessions.Where(session =>
+        var result = new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions).Where(session =>
         {
             session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             if (charInfo == null) return false;
@@ -61,7 +62,7 @@ public static class Helper
     public static Task<List<ISession>> GetSessionsInSector(int sectorX, int sectorY)
     {
         var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
-        var result = sharedObjects.AgentSessions.Where(session =>
+        var result = new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions).Where(session =>
         {
             session.GetData(Data.CharInfo, out ICharInfo? targetCharInfo, null);
             if (targetCharInfo == null) return false;
@@ -77,7 +78,7 @@ public static class Helper
         await Task.Run(() =>
         {
             var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
-            foreach (var targetSession in sharedObjects.AgentSessions)
+            foreach (var targetSession in new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions))
             {
                 targetSession.GetData(Data.CharacterGameReady, out var characterGameReady, false);
 
@@ -101,7 +102,7 @@ public static class Helper
         var sectorY = charInfo.GetCalcPosition.Region.Y;
         await Task.Run(() =>
         {
-            foreach (var targetSession in sharedObjects.AgentSessions)
+            foreach (var targetSession in new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions))
             {
                 targetSession.GetData(Data.CharacterGameReady, out var characterGameReady, false);
                 if (characterGameReady != clientIsReady) continue;
@@ -128,29 +129,37 @@ public static class Helper
     {
         await Task.Run(() =>
         {
-            var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
-            switch (serverType)
+            try
             {
-                case ServerType.None:
-                    break;
-                case ServerType.DownloadServer:
-                    foreach (var session in sharedObjects.DownloadSessions) session.SendToClient(packet);
-                    break;
-                case ServerType.GatewayServer:
-                    foreach (var session in sharedObjects.GatewaySessions) session.SendToClient(packet);
-                    break;
-                case ServerType.AgentServer:
-                    foreach (var session in sharedObjects.AgentSessions)
-                    {
-                        session.GetData(Data.CharacterGameReady, out var characterGameReady, false);
-                        if (characterGameReady != clientIsReady) continue;
-                        session.SendToClient(packet);
-                    }
+                var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));
+                switch (serverType)
+                {
+                    case ServerType.None:
+                        break;
+                    case ServerType.DownloadServer:
+                        foreach (var session in new System.Collections.Generic.HashSet<ISession>(sharedObjects.DownloadSessions)) session.SendToClient(packet);
+                        break;
+                    case ServerType.GatewayServer:
+                        foreach (var session in new System.Collections.Generic.HashSet<ISession>(sharedObjects.GatewaySessions)) session.SendToClient(packet);
+                        break;
+                    case ServerType.AgentServer:
+                        foreach (var session in new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions))
+                        {
+                            session.GetData(Data.CharacterGameReady, out var characterGameReady, false);
+                            if (characterGameReady != clientIsReady) continue;
+                            session.SendToClient(packet);
+                        }
 
-                    break;
-                default:
-                    Log.Error("Helper - BroadcastPacket - {0}, {1}", nameof(serverType), serverType);
-                    break;
+                        break;
+                    default:
+                        Log.Error("Helper - BroadcastPacket - {0}, {1}", nameof(serverType), serverType);
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warning("{0}", e.ToString());
+                throw;
             }
         });
     }
