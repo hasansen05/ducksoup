@@ -30,7 +30,7 @@ public class FakeSession : TcpSession
         {
             var fakeRemoteClient = new FakeClient(server, service);
             fakeRemoteClient.ConnectAsync();
-            
+
             Session = new DuckSession(this, fakeRemoteClient);
             fakeRemoteClient.Session = Session;
         }
@@ -56,7 +56,7 @@ public class FakeSession : TcpSession
         {
             return;
         }
-        
+
         Log.Debug($"FakeSession connected with Id {Id} connected!");
         FakeServer.AddSession(Session);
     }
@@ -67,7 +67,7 @@ public class FakeSession : TcpSession
         {
             return;
         }
-        
+
         FakeServer.RemoveSession(Session);
         Log.Debug($"FakeSession disconnected with Id {Id} disconnected!");
         Session.Disconnect();
@@ -79,7 +79,7 @@ public class FakeSession : TcpSession
         {
             return;
         }
-        
+
         Console.WriteLine($"FakeSession caught an error with code {error}");
         Session.Disconnect();
     }
@@ -92,7 +92,7 @@ public class FakeSession : TcpSession
         {
             return;
         }
-        
+
         Session.GetData(Data.CrcFailure, out var crc, 0);
         if (crc > 5)
         {
@@ -150,7 +150,7 @@ public class FakeSession : TcpSession
         {
             Session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             Session.GetData(Data.CharId, out int charId, -1);
-            Log.Error("FakeSession Recv | 0x{0:X} | Name: {1} | Id: {2} | ServerType: {3} ", message, (charInfo != null? charInfo.CharName : "null"), charId, FakeServer.Service.ServerType);
+            Log.Error("FakeSession Recv | 0x{0:X} | Name: {1} | Id: {2} | ServerType: {3} ", message, (charInfo != null ? charInfo.CharName : "null"), charId, FakeServer.Service.ServerType);
             Log.Error("FakeSession Recv | {0}", exception.Message);
             Log.Error("FakeSession Recv | {0}", exception.StackTrace);
             Log.Error("FakeSession Recv | {0}", exception.InnerException);
@@ -161,13 +161,29 @@ public class FakeSession : TcpSession
 
     public void Send(Packet packet, bool transfer = false)
     {
-        ClientSecurity.Send(packet);
+        try
+        {
+            ClientSecurity.Send(packet);
 
-        if (transfer) Transfer();
+            if (transfer) Transfer();
+        }
+        catch (Exception e)
+        {
+            Log.Warning("{0}", e.ToString());
+            this.Disconnect();
+        }
     }
 
     public void Transfer()
     {
-        ClientSecurity.TransferOutgoing(this);
+        try
+        {
+            ClientSecurity.TransferOutgoing(this);
+        }
+        catch (Exception e)
+        {
+            Log.Warning("{0}", e.ToString());
+            this.Disconnect();
+        }
     }
 }

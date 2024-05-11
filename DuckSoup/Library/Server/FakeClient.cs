@@ -119,13 +119,29 @@ public class FakeClient : TcpClient
 
     public void Send(Packet packet, bool transfer = false)
     {
-        ServerSecurity.Send(packet);
+        try
+        {
+            ServerSecurity.Send(packet);
 
-        if (transfer) Transfer();
+            if (transfer) Transfer();
+        }
+        catch (Exception e)
+        {
+            Log.Warning("{0}", e.ToString());
+            this.Disconnect();
+        }
     }
 
     public void Transfer()
     {
-        ServerSecurity.TransferOutgoing(this);
+        try
+        {
+            ServerSecurity.TransferOutgoing(this);
+        }
+        catch (Exception e)
+        {
+            Log.Warning("{0}", e.ToString());
+            this.Disconnect();
+        }
     }
 }
