@@ -31,7 +31,6 @@ public static class Program
 
     private static void Main()
     {
-        ThreadPool.SetMinThreads(1024 * 32, 1024 * 32);
         LoggingLevelSwitch.MinimumLevel = LogEventLevel.Debug; 
 
         Log.Logger = new LoggerConfiguration()

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using NetCoreServer;
 using Serilog;
 using SilkroadSecurityAPI.Exceptions;
@@ -167,7 +168,7 @@ public class Security : ISecurity
             var index = 0;
             while (length > 0)
             {
-                Log.Debug("Security:170");
+                Log.Debug("Security:170 ThreadId: {0}", Environment.CurrentManagedThreadId);
                 var maxLength = length;
                 var calcLength = _mRecvBuffer.Buffer.Length - _mRecvBuffer.Size;
 
@@ -184,7 +185,7 @@ public class Security : ISecurity
                 // Loop while we have data to process
                 while (_mRecvBuffer.Size > 0)
                 {
-                    Log.Debug("Security:187");
+                    Log.Debug("Security:187 ThreadId: {0}", Environment.CurrentManagedThreadId);
                     // If we do not have a current packet object, try to allocate one.
                     if (_mCurrentBuffer == null)
                     {
@@ -390,7 +391,7 @@ public class Security : ISecurity
 
         while (HasPacketToSend())
         {
-            Log.Debug("Security:393");
+            Log.Debug("Security:393 ThreadId: {0}", Environment.CurrentManagedThreadId);
             if (session.IsDisposed || !session.IsConnected)
                 break;
 
