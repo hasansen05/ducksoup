@@ -167,9 +167,13 @@ public class FakeSession : TcpSession
 
             if (transfer) Transfer();
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Log.Warning("{0}", e.ToString());
+            Log.Error("FakeSession:166 | ID: {0} ", this.Id);
+            Log.Error("FakeSession:166 | {0}", exception.Message);
+            Log.Error("FakeSession:166 | {0}", exception.StackTrace);
+            Log.Error("FakeSession:166 | {0}", exception.InnerException);
+            Log.Error("FakeSession:166 | {0}", exception.Data);
             this.Disconnect();
         }
     }
@@ -180,9 +184,13 @@ public class FakeSession : TcpSession
         {
             ClientSecurity.TransferOutgoing(this);
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Log.Warning("{0}", e.ToString());
+            Log.Error("FakeSession:181 | ID: {0} ", this.Id);
+            Log.Error("FakeSession:181 | {0}", exception.Message);
+            Log.Error("FakeSession:181 | {0}", exception.StackTrace);
+            Log.Error("FakeSession:181 | {0}", exception.InnerException);
+            Log.Error("FakeSession:181 | {0}", exception.Data);
             this.Disconnect();
         }
     }

@@ -125,9 +125,13 @@ public class FakeClient : TcpClient
 
             if (transfer) Transfer();
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Log.Warning("{0}", e.ToString());
+            Log.Error("FakeClient:124 | ID: {0} ", this.Id);
+            Log.Error("FakeClient:124 | {0}", exception.Message);
+            Log.Error("FakeClient:124 | {0}", exception.StackTrace);
+            Log.Error("FakeClient:124 | {0}", exception.InnerException);
+            Log.Error("FakeClient:124 | {0}", exception.Data);
             this.Disconnect();
         }
     }
@@ -138,9 +142,13 @@ public class FakeClient : TcpClient
         {
             ServerSecurity.TransferOutgoing(this);
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Log.Warning("{0}", e.ToString());
+            Log.Error("FakeClient:143 | ID: {0} ", this.Id);
+            Log.Error("FakeClient:143 | {0}", exception.Message);
+            Log.Error("FakeClient:143 | {0}", exception.StackTrace);
+            Log.Error("FakeClient:143 | {0}", exception.InnerException);
+            Log.Error("FakeClient:143 | {0}", exception.Data);
             this.Disconnect();
         }
     }

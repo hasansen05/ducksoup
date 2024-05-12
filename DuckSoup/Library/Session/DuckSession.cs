@@ -32,7 +32,7 @@ public class DuckSession : ISession
 
     [JsonIgnore] private FakeClient Server { get; }
 
-    [JsonIgnore] public IPEndPoint RemoteEndPoint => (IPEndPoint)Client.Socket.RemoteEndPoint;
+    [JsonIgnore] public IPEndPoint? RemoteEndPoint => (IPEndPoint?)Client?.Socket?.RemoteEndPoint;
 
     public Guid Guid { get; }
 

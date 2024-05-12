@@ -9,7 +9,7 @@ public interface ISession
     /// <summary>
     ///     Endpoint of the client / user
     /// </summary>
-    IPEndPoint RemoteEndPoint { get; }
+    IPEndPoint? RemoteEndPoint { get; }
 
     /// <summary>
     ///     Unique ID of the session

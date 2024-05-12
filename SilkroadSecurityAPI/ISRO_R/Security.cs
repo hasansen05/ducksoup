@@ -387,7 +387,7 @@ public class Security : ISecurity
         }
     }
 
-    public void TransferOutgoing(TcpSession session)
+    public void TransferOutgoing(TcpSession? session)
     {
         if (!HasPacketToSend()) return;
 

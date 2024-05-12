@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
+using API;
 using API.Command;
 using API.Server;
 using API.ServiceFactory;
@@ -27,14 +28,12 @@ namespace DuckSoup;
 
 public static class Program
 {
-    public static LoggingLevelSwitch LoggingLevelSwitch { get; } = new LoggingLevelSwitch();
-
     private static void Main()
     {
-        LoggingLevelSwitch.MinimumLevel = LogEventLevel.Debug; 
+        Helper.LoggingLevelSwitch.MinimumLevel = LogEventLevel.Debug; 
 
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.ControlledBy(LoggingLevelSwitch)
+            .MinimumLevel.ControlledBy(Helper.LoggingLevelSwitch)
             .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}")
             .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, 
                 outputTemplate: "{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}")

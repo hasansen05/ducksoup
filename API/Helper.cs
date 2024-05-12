@@ -2,12 +2,15 @@
 using LanguageExt;
 using PacketLibrary.Handler;
 using Serilog;
+using Serilog.Core;
 using SilkroadSecurityAPI.Message;
 
 namespace API;
 
 public static class Helper
 {
+    public static LoggingLevelSwitch LoggingLevelSwitch { get; } = new LoggingLevelSwitch();
+
     public static Task<ISession?> GetSessionByUniqueId(uint uniqueId)
     {
         var sharedObjects = ServiceFactory.ServiceFactory.Load<ISharedObjects>(typeof(ISharedObjects));

@@ -385,14 +385,14 @@ public class Security : ISecurity
         }
     }
 
-    public void TransferOutgoing(TcpSession session)
+    public void TransferOutgoing(TcpSession? session)
     {
         if (!HasPacketToSend()) return;
 
         while (HasPacketToSend())
         {
             Log.Debug("Security:393 ThreadId: {0}", Environment.CurrentManagedThreadId);
-            if (session.IsDisposed || !session.IsConnected)
+            if (session == null || session.IsDisposed || !session.IsConnected)
                 break;
 
             var buff = GetPacketToSendLite();

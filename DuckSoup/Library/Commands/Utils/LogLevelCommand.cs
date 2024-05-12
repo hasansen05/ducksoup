@@ -1,4 +1,5 @@
-﻿using Serilog.Events;
+﻿using API;
+using Serilog.Events;
 
 namespace DuckSoup.Library.Commands.Utils;
 
@@ -33,7 +34,7 @@ public class LogLevelCommand : Command
         }
  
         var eventLevel = (LogEventLevel) level;
-        Program.LoggingLevelSwitch.MinimumLevel = eventLevel;
+        Helper.LoggingLevelSwitch.MinimumLevel = eventLevel;
         
         Log.Information("Log level switched to {0} until the next restart", eventLevel);
     }

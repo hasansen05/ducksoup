@@ -22,9 +22,9 @@ public class SharedObjects : ISharedObjects
             (LogEventLevel) int.Parse(
                 DatabaseHelper.GetSettingOrDefault("DebugLevel", ((byte)LogEventLevel.Information).ToString()));
         
-        Program.LoggingLevelSwitch.MinimumLevel = LogEventLevel.Verbose;
+        Helper.LoggingLevelSwitch.MinimumLevel = LogEventLevel.Verbose;
         Log.Information("Log is on {0} ({1}) its recommend to set it to 2 (Information) in the database", (byte) DebugLevel, DebugLevel);
-        Program.LoggingLevelSwitch.MinimumLevel = DebugLevel;
+        Helper.LoggingLevelSwitch.MinimumLevel = DebugLevel;
         
         AgentSessions = new HashSet<ISession>();
         DownloadSessions = new HashSet<ISession>();

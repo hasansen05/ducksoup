@@ -15,7 +15,7 @@
         <PackageIcon>DuckSoup.png</PackageIcon>
         <RepositoryUrl>https://github.com/b0ykoe/ducksoup</RepositoryUrl>
         <LangVersion>12</LangVersion>
-        <Version>2.0.4-ALPHA</Version>
+        <Version>2.0.5-ALPHA</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Nullable>enable</Nullable>
     </PropertyGroup>
