@@ -43,7 +43,7 @@ public class VSRO188_GatewayServer : FakeServer
         }
         catch (Exception exception)
         {
-            Log.Error("{0}", exception.ToString());
+            Log.Error("VSRO188_GatewayServer:46 {0}", exception.ToString());
         }
     } 
 
@@ -56,7 +56,7 @@ public class VSRO188_GatewayServer : FakeServer
         }
         catch (Exception exception)
         {
-            Log.Error("{0}", exception.ToString());
+            Log.Error("VSRO188_GatewayServer:59 {0}", exception.ToString());
         }
     }
 

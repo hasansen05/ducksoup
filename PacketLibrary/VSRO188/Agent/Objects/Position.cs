@@ -1,4 +1,5 @@
-﻿using SilkroadSecurityAPI.Message;
+﻿using Serilog;
+using SilkroadSecurityAPI.Message;
 
 namespace PacketLibrary.VSRO188.Agent.Objects;
 
@@ -21,12 +22,14 @@ public struct Position
 
             while (XOffset < 0)
             {
+                Log.Debug("Position:25");
                 XOffset += 1920;
                 Region.X -= 1;
             }
 
             while (XOffset > 1920)
             {
+                Log.Debug("Position:32");
                 XOffset -= 1920;
                 Region.X += 1;
             }
@@ -45,12 +48,14 @@ public struct Position
 
             while (YOffset < 0)
             {
+                Log.Debug("Position:49");
                 YOffset += 1920;
                 Region.Y -= 1;
             }
 
             while (YOffset > 1920)
             {
+                Log.Debug("Position:58");
                 YOffset -= 1920;
                 Region.Y += 1;
             }

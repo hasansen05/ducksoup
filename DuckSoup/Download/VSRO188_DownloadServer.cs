@@ -25,7 +25,7 @@ public class VSRO188_DownloadServer : FakeServer
         }
         catch (Exception exception)
         {
-            Log.Error("{0}", exception.ToString());
+            Log.Error("VSRO188_DownloadServer:28 {0}", exception.ToString());
         }
     }
 
@@ -38,7 +38,7 @@ public class VSRO188_DownloadServer : FakeServer
         }
         catch (Exception exception)
         {
-            Log.Error("{0}", exception.ToString());
+            Log.Error("VSRO188_DownloadServer:41 {0}", exception.ToString());
         }
     }
 }

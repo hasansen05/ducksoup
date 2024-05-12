@@ -393,9 +393,9 @@ public class Security : ISecurity
 
         while (HasPacketToSend())
         {
-            if (session.IsDisposed || !session.IsConnected)
+            if (session == null || session.IsDisposed || !session.IsConnected)
                 break;
-
+            
             var buff = GetPacketToSendLite();
             session.Send(buff.Buffer, buff.Offset, buff.Size);
         }

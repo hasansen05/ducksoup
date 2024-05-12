@@ -164,6 +164,7 @@ public class EntityParsingHandler
                     var iLevel = growth.Level;
                     while (growth.Experience > Cache.GetRefLevelAsync(iLevel).Result.Exp_C)
                     {
+                        Log.Debug("EntityParsingHandler:167");
                         growth.Experience -= Cache.GetRefLevelAsync(iLevel).Result.Exp_C;
                         iLevel++;
                     }
@@ -211,6 +212,7 @@ public class EntityParsingHandler
                     var iLevel = fellow.Level;
                     while (fellow.Experience > Cache.GetRefLevelAsync(iLevel).Result.Exp_C)
                     {
+                        Log.Debug("EntityParsingHandler:215");
                         fellow.Experience -= Cache.GetRefLevelAsync(iLevel).Result.Exp_C;
                         iLevel++;
                     }

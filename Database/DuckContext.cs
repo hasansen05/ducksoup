@@ -12,7 +12,16 @@ public class DuckContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (ConnectionStrings.ContainsKey(GetType())) optionsBuilder.UseSqlServer(ConnectionStrings[GetType()]).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        if (!ConnectionStrings.ContainsKey(GetType()))
+        {
+            return;
+        }
+        optionsBuilder.UseSqlServer(
+                ConnectionStrings[GetType()],
+                options => options.CommandTimeout(5)
+            )
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
     }
 
     public bool CanConnect()

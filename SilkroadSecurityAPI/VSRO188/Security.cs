@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using NetCoreServer;
+using Serilog;
 using SilkroadSecurityAPI.Exceptions;
 using SilkroadSecurityAPI.Message;
 using Buffer = System.Buffer;
@@ -166,6 +167,7 @@ public class Security : ISecurity
             var index = 0;
             while (length > 0)
             {
+                Log.Debug("Security:170");
                 var maxLength = length;
                 var calcLength = _mRecvBuffer.Buffer.Length - _mRecvBuffer.Size;
 
@@ -182,6 +184,7 @@ public class Security : ISecurity
                 // Loop while we have data to process
                 while (_mRecvBuffer.Size > 0)
                 {
+                    Log.Debug("Security:187");
                     // If we do not have a current packet object, try to allocate one.
                     if (_mCurrentBuffer == null)
                     {
@@ -387,6 +390,7 @@ public class Security : ISecurity
 
         while (HasPacketToSend())
         {
+            Log.Debug("Security:393");
             if (session.IsDisposed || !session.IsConnected)
                 break;
 
@@ -401,6 +405,7 @@ public class Security : ISecurity
 
         while (HasPacketToSend())
         {
+            Log.Debug("Security:408");
             if (client.IsDisposed || !client.IsConnected)
                 break;
 
@@ -450,7 +455,11 @@ public class Security : ISecurity
             if (HasPacketToSend())
             {
                 buffers = new List<KeyValuePair<TransferBuffer, Packet>>();
-                while (HasPacketToSend()) buffers.Add(GetPacketToSend());
+                while (HasPacketToSend())
+                {
+                    Log.Debug("Security:460");
+                    buffers.Add(GetPacketToSend());
+                }
             }
         }
 
@@ -716,6 +725,7 @@ public class Security : ISecurity
 
         while (X != 0)
         {
+            Log.Debug("Security:728");
             if ((X & 1) > 0) result = mult * result % P;
 
             X = X >> 1;
@@ -1152,6 +1162,7 @@ public class Security : ISecurity
 
             while (workspace.Size > 0)
             {
+                Log.Debug("Security:1165");
                 var part_data = new PacketWriter();
 
                 var cur_size =
@@ -1225,6 +1236,7 @@ public class Security : ISecurity
 
                 while (workspace.Size > 0)
                 {
+                    Log.Debug("Security:1239");
                     var part_data = new PacketWriter();
 
                     var cur_size =

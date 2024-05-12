@@ -53,7 +53,7 @@ public class PartyManagerHandlers
         }
         catch (Exception e)
         {
-            Log.Error("{0}", e.InnerException);
+            Log.Error("PartyManagerHandler:56 {0}", e.InnerException);
         }
 
         return data;
@@ -132,7 +132,7 @@ public class PartyManagerHandlers
         }
         catch (Exception e)
         {
-            Log.Error("{0}", e.InnerException);
+            Log.Error("PartyManagerHandler:135 {0}", e.InnerException);
         }
 
         return data;
@@ -146,7 +146,7 @@ public class PartyManagerHandlers
         }
         catch (Exception e)
         {
-            Log.Error("{0}", e.InnerException);
+            Log.Error("PartyManagerHandler:149 {0}", e.InnerException);
         }
 
         return data;
@@ -189,7 +189,7 @@ public class PartyManagerHandlers
         }
         catch (Exception e)
         {
-            Log.Error("{0}", e.InnerException);
+            Log.Error("PartyManagerHandler:192 {0}", e.InnerException);
         }
 
         return data;
@@ -250,7 +250,7 @@ public class PartyManagerHandlers
         }
         catch (Exception e)
         {
-            Log.Error("{0}", e.InnerException);
+            Log.Error("PartyManagerHandler:253 {0}", e.InnerException);
         }
 
         return data;

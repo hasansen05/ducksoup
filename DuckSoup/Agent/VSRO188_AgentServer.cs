@@ -171,7 +171,7 @@ public class VSRO188_AgentServer : FakeServer
         }
         catch (Exception exception)
         {
-            Log.Error("{0}", exception.ToString());
+            Log.Error("VSRO188_AgentServer:174 {0}", exception.ToString());
         }
     }
 
@@ -183,7 +183,7 @@ public class VSRO188_AgentServer : FakeServer
         }
         catch (Exception exception)
         {
-            Log.Error("{0}", exception.ToString());
+            Log.Error("VSRO188_AgentServer:186 {0}", exception.ToString());
         }
     }
 }

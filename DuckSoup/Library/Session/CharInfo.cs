@@ -351,6 +351,7 @@ public class CharInfo : ICharInfo
         _packet.TryRead(out byte nextMastery); // 1   byte    nextMastery
         while (nextMastery == 1)
         {
+            Log.Debug("CharInfo:352");
             _packet.TryRead(out uint masteryId); // 4   uint    mastery.ID
             _packet.TryRead(out byte masteryLevel); // 1   byte    mastery.Level   
             _packet.TryRead(out nextMastery); // 1   byte    nextMastery
@@ -365,6 +366,7 @@ public class CharInfo : ICharInfo
         _packet.TryRead(out byte nextSkill); // 1   byte    nextSkill
         while (nextSkill == 1)
         {
+            Log.Debug("CharInfo:369");
             _packet.TryRead(out uint skillId); // 4   uint    skill.ID
             _packet.TryRead(out byte skillEnabled); // 1   byte    skill.Enabled   
 
