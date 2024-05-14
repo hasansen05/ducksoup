@@ -15,6 +15,7 @@ public static class EventFactoryNames
     // Game stuff
     public const string OnCharacterFirstSpawn = "OnCharacterFirstSpawn"; // ISession
     public const string OnCharacterGameReadyChange = "OnCharacterGameReadyChange"; // ISession, (Bool) Status
+    public const string OnCharacterSpawn = "OnCharacterSpawn"; // ISession, (Bool) Status
 
     // Server Stuff
     public const string OnAsyncServerStart = "OnAsyncServerStart"; // IAsyncServer

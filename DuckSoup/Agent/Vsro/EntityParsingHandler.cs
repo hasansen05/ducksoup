@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using API.EventFactory;
 using API.Extensions;
 using API.Session;
 using Database.VSRO188;
@@ -27,11 +28,27 @@ public class EntityParsingHandler
         packetHandler.RegisterModuleHandler<SERVER_CHARACTER_DATA_BEGIN>(CharacterDataBegin);
         packetHandler.RegisterModuleHandler<SERVER_CHARACTER_DATA>(CharacterData);
         packetHandler.RegisterModuleHandler<SERVER_CHARACTER_DATA_END>(CharacterDataEnd);
+        packetHandler.RegisterModuleHandler<SERVER_On3305>(AGENT_COMMUNITY_FRIEND_INFO);
 
         packetHandler.RegisterModuleHandler<SERVER_ENTITY_STATE_UPDATE>(EntityStateUpdate);
         packetHandler.RegisterModuleHandler<SERVER_COS_UPDATE_RIDESTATE_RESPONSE>(CosUpdateRidestateResponse);
         packetHandler.RegisterModuleHandler<SERVER_COS_UPDATE>(CosUpdate);
         packetHandler.RegisterModuleHandler<SERVER_COS_INFO>(CosInfo);
+    }
+
+    private async Task<Packet> AGENT_COMMUNITY_FRIEND_INFO(SERVER_On3305 data, ISession session)
+    {
+        EventFactory.Publish(EventFactoryNames.OnCharacterSpawn, session);
+
+        session.GetData(Data.FirstSpawn, out var firstSpawn, false);
+        
+        if (!firstSpawn)
+        {
+            session.SetData(Data.FirstSpawn, true);
+            EventFactory.Publish(EventFactoryNames.OnCharacterFirstSpawn, session);
+        }
+
+        return data;
     }
 
     private async Task<Packet> CosInfo(SERVER_COS_INFO data, ISession session)
@@ -430,13 +447,15 @@ public class EntityParsingHandler
     private async Task<Packet> CharacterDataEnd(SERVER_CHARACTER_DATA_END data, ISession session)
     {
         session.GetData(Data.CharInfo, out var charInfo, new CharInfo());
+
         var charPacket = charInfo.GetPacket();
         if (charPacket == null) return data;
-
+        
         await charInfo.Read();
         // await session.SendToClient(charPacket);
         charInfo.Clear();
-
+        
+        
         return data;
     }
 

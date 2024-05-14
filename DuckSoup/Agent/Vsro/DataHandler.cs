@@ -27,18 +27,10 @@ public class DataHandler
         session.GetData(Data.CharScreen, out var charScreen, true);
         session.SetData(Data.CharacterGameReady, true);
         session.SetData(Data.CharacterGameReadyTimestamp, DateTime.Now.ToUnixTimeMilliseconds());
-        session.GetData(Data.FirstSpawn, out var firstSpawn, false);
-
         if (charScreen)
         {
             EventFactory.Publish(EventFactoryNames.OnUserLeaveCharScreen, session);
             session.SetData(Data.CharScreen, false);
-        }
-
-        if (!firstSpawn)
-        {
-            session.SetData(Data.FirstSpawn, true);
-            EventFactory.Publish(EventFactoryNames.OnCharacterFirstSpawn, session);
         }
 
         EventFactory.Publish(EventFactoryNames.OnCharacterGameReadyChange, session, true);
