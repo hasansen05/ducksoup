@@ -18,7 +18,7 @@ public class DuckContext : DbContext
         }
         optionsBuilder.UseSqlServer(
                 ConnectionStrings[GetType()],
-                options => options.CommandTimeout(5)
+                options => options.CommandTimeout(30)
             )
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
