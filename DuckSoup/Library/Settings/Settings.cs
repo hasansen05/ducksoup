@@ -16,6 +16,9 @@ public class Settings : ISettings
     public string LogDb { get; set; }
     public string AccountDb { get; set; }
     public string ProxyDb { get; set; }
+    public int MaximumPool { get; set; }
+    public int MinimumPool { get; set; }
+    public int ConnectionLifetime { get; set; }
 
     public ISettings Init()
     {
@@ -27,6 +30,9 @@ public class Settings : ISettings
         LogDb = "SRO_VT_LOG";
         AccountDb = "SRO_VT_ACCOUNT";
         ProxyDb = "DuckSoup";
+        MaximumPool = 500;
+        MinimumPool = 50;
+        ConnectionLifetime = 0;
 
         return this;
     }
