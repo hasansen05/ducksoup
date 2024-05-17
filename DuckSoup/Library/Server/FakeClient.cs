@@ -37,9 +37,9 @@ public class FakeClient : TcpClient
         {
             return;
         }
-        
-        Log.Debug($"FakeRemoteClient disconnected a session with Id {Id}");
+
         Session.Disconnect();
+        Log.Debug($"FakeRemoteClient disconnected a session with Id {Id}");
     }
 
     protected override void OnError(SocketError error)
@@ -48,9 +48,9 @@ public class FakeClient : TcpClient
         {
             return;
         }
-        
-        Log.Debug($"FakeRemoteClient caught an error with code {error}");
+
         Session.Disconnect();
+        Log.Debug($"FakeRemoteClient caught an error with code {error}");
     }
 
     // Receive from Server

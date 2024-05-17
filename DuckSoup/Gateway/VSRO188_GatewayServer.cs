@@ -52,7 +52,11 @@ public class VSRO188_GatewayServer : FakeServer
         try
         {
             base.RemoveSession(session);
-            if (_sharedObjects.GatewaySessions.Contains(session)) _sharedObjects.GatewaySessions.Remove(session);
+            bool remove = _sharedObjects.GatewaySessions.TryRemove(session);
+            if (!remove)
+            {
+                Log.Error("DownloadServer error sessionremoval {0}", session.Guid);
+            }        
         }
         catch (Exception exception)
         {

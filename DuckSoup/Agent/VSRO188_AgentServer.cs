@@ -179,7 +179,11 @@ public class VSRO188_AgentServer : FakeServer
     {
         try {
             base.RemoveSession(session);
-            if (_sharedObjects.AgentSessions.Contains(session)) _sharedObjects.AgentSessions.Remove(session);
+            bool remove = _sharedObjects.AgentSessions.TryRemove(session);
+            if (!remove)
+            {
+                Log.Error("AgentServer error sessionremoval {0}", session.Guid);
+            }
         }
         catch (Exception exception)
         {

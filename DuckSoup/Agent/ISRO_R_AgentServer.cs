@@ -24,6 +24,6 @@ public class ISRO_R_AgentServer : FakeServer
     public override void RemoveSession(ISession session)
     {
         base.RemoveSession(session);
-        if (_sharedObjects.AgentSessions.Contains(session)) _sharedObjects.AgentSessions.Remove(session);
+        _sharedObjects.AgentSessions.TryRemove(session);
     }
 }

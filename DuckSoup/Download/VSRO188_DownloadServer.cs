@@ -34,7 +34,11 @@ public class VSRO188_DownloadServer : FakeServer
         try
         {
             base.RemoveSession(session);
-            if (_sharedObjects.DownloadSessions.Contains(session)) _sharedObjects.DownloadSessions.Remove(session);
+            bool remove = _sharedObjects.DownloadSessions.TryRemove(session);
+            if (!remove)
+            {
+                Log.Error("DownloadServer error sessionremoval {0}", session.Guid);
+            }
         }
         catch (Exception exception)
         {

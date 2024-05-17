@@ -1,10 +1,11 @@
-﻿using PacketLibrary.Handler;
+﻿using ConcurrentCollections;
+using PacketLibrary.Handler;
 
 namespace API;
 
 public interface ISharedObjects : IDisposable
 {
-    HashSet<ISession> DownloadSessions { get; }
-    HashSet<ISession> GatewaySessions { get; }
-    HashSet<ISession> AgentSessions { get; }
+    ConcurrentHashSet<ISession> DownloadSessions { get; }
+    ConcurrentHashSet<ISession> GatewaySessions { get; }
+    ConcurrentHashSet<ISession> AgentSessions { get; }
 }

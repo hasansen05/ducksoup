@@ -24,6 +24,6 @@ public class ISRO_R_DownloadServer : FakeServer
     public override void RemoveSession(ISession session)
     {
         base.RemoveSession(session);
-        if (_sharedObjects.DownloadSessions.Contains(session)) _sharedObjects.DownloadSessions.Remove(session);
+        _sharedObjects.DownloadSessions.TryRemove(session);
     }
 }

@@ -1,5 +1,5 @@
 ﻿using API.Session;
-using LanguageExt;
+using ConcurrentCollections;
 using PacketLibrary.Handler;
 using Serilog;
 using Serilog.Core;
@@ -140,13 +140,13 @@ public static class Helper
                     case ServerType.None:
                         break;
                     case ServerType.DownloadServer:
-                        foreach (var session in new System.Collections.Generic.HashSet<ISession>(sharedObjects.DownloadSessions)) session.SendToClient(packet);
+                        foreach (var session in new ConcurrentHashSet<ISession>(sharedObjects.DownloadSessions)) session.SendToClient(packet);
                         break;
                     case ServerType.GatewayServer:
-                        foreach (var session in new System.Collections.Generic.HashSet<ISession>(sharedObjects.GatewaySessions)) session.SendToClient(packet);
+                        foreach (var session in new ConcurrentHashSet<ISession>(sharedObjects.GatewaySessions)) session.SendToClient(packet);
                         break;
                     case ServerType.AgentServer:
-                        foreach (var session in new System.Collections.Generic.HashSet<ISession>(sharedObjects.AgentSessions))
+                        foreach (var session in new ConcurrentHashSet<ISession>(sharedObjects.AgentSessions))
                         {
                             session.GetData(Data.CharacterGameReady, out var characterGameReady, false);
                             if (characterGameReady != clientIsReady) continue;

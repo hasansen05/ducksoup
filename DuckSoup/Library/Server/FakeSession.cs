@@ -68,9 +68,9 @@ public class FakeSession : TcpSession
             return;
         }
 
+        Session.Disconnect();
         FakeServer.RemoveSession(Session);
         Log.Debug($"FakeSession disconnected with Id {Id} disconnected!");
-        Session.Disconnect();
     }
 
     protected override void OnError(SocketError error)
@@ -80,8 +80,8 @@ public class FakeSession : TcpSession
             return;
         }
 
-        Console.WriteLine($"FakeSession caught an error with code {error}");
         Session.Disconnect();
+        Console.WriteLine($"FakeSession caught an error with code {error}");
     }
 
     // Receive from Client

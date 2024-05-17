@@ -36,7 +36,7 @@ public class ISRO_R_GatewayServer : FakeServer
     public override void RemoveSession(ISession session)
     {
         base.RemoveSession(session);
-        if (_sharedObjects.GatewaySessions.Contains(session)) _sharedObjects.GatewaySessions.Remove(session);
+        _sharedObjects.GatewaySessions.TryRemove(session);
     }
 
     private async Task<Packet> SERVER_GATEWAY_LOGIN_RESPONSE(SERVER_GATEWAY_LOGIN_RESPONSE data, ISession session)
