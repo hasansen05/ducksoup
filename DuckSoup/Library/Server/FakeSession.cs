@@ -22,12 +22,11 @@ public class FakeSession : TcpSession
     public FakeSession(FakeServer server, Service service) : base(server)
     {
         FakeServer = server;
-
-        ClientSecurity = Utility.GetSecurity(service.SecurityType);
-        ClientSecurity.GenerateSecurity(true, true, true);
-
         try
         {
+            ClientSecurity = Utility.GetSecurity(service.SecurityType);
+            ClientSecurity.GenerateSecurity(true, true, true);
+            
             var fakeRemoteClient = new FakeClient(server, service);
             fakeRemoteClient.ConnectAsync();
 

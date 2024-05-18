@@ -18,8 +18,20 @@ public class FakeClient : TcpClient
     public FakeClient(FakeServer fakeServer, Service service) : base(service.RemoteMachine_Machine.Address,
         service.RemotePort)
     {
-        ServerSecurity = Utility.GetSecurity(service.SecurityType);
-        FakeServer = fakeServer;
+        try
+        {
+            ServerSecurity = Utility.GetSecurity(service.SecurityType);
+            FakeServer = fakeServer;
+        } 
+        catch (Exception exception)
+        {
+            Log.Error("FakeClient | Something went wrong in initialisation");
+            Log.Error("FakeClient | {0}", exception.Message);
+            Log.Error("FakeClient | {0}", exception.StackTrace);
+            Log.Error("FakeClient | {0}", exception.InnerException);
+            Log.Error("FakeClient | {0}", exception.Data);
+            base.Disconnect();
+        }
     }
 
     public ISession? Session { get; internal set; }
