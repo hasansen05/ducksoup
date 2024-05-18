@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using NetCoreServer;
 using Serilog;
 using SilkroadSecurityAPI.Exceptions;
@@ -99,61 +100,83 @@ public class Security : ISecurity
     // this security object.
     public void ChangeIdentity(string name, byte flag)
     {
-        LastLockStateStart = CurrentLockStateStart;
-        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        LastLockStateStop = CurrentLockStateStop;
-        lock (m_class_lock)
+        var lockWasTaken = false;
+        try
         {
-            LastLockState = CurrentLockState;
-            CurrentLockState = LockState.ChangeIdentity;
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
-            _mIdentityName = name;
-            _mIdentityFlag = flag;
+            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
+            if (lockWasTaken)
+            {
+                LastLockState = CurrentLockState;
+                CurrentLockState = LockState.ChangeIdentity;
+                if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
+                _mIdentityName = name;
+                _mIdentityFlag = flag;
+            }
+            else
+            {
+                Log.Error("Lock Timeout exceeded for ID: {0} | current lock {1} | last lock {2}", Guid, CurrentLockState, LastLockState);
+                throw new Exception($"Lock Timeout exceeded for ID: {Guid} | current lock {CurrentLockState} | last lock {LastLockState}");
+            }
         }
-        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        finally
+        {
+            if (lockWasTaken)
+            {
+                Monitor.Exit(m_class_lock);
+            }
+        }
     }
 
     // Generates the security settings. This should only be called if the security object
     // is being used to process an incoming connection's data (server).
     public void GenerateSecurity(bool blowfish, bool security_bytes, bool handshake)
     {
-        LastLockStateStart = CurrentLockStateStart;
-        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        LastLockStateStop = CurrentLockStateStop;
-        lock (m_class_lock)
+        var lockWasTaken = false;
+        try
         {
-            LastLockState = CurrentLockState;
-            CurrentLockState = LockState.GenerateSecurity;
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
-
-            var flags = new SecurityFlags();
-            if (blowfish)
+            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
+            if (lockWasTaken)
             {
-                flags.none = 0;
-                flags.blowfish = 1;
-            }
+                LastLockState = CurrentLockState;
+                CurrentLockState = LockState.ChangeIdentity;
+                if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
-            if (security_bytes)
+                var flags = new SecurityFlags();
+                if (blowfish)
+                {
+                    flags.none = 0;
+                    flags.blowfish = 1;
+                }
+
+                if (security_bytes)
+                {
+                    flags.none = 0;
+                    flags.security_bytes = 1;
+                }
+
+                if (handshake)
+                {
+                    flags.none = 0;
+                    flags.handshake = 1;
+                }
+
+                if (!blowfish && !security_bytes && !handshake) flags.none = 1;
+
+                GenerateSecurity(flags);
+            }
+            else
             {
-                flags.none = 0;
-                flags.security_bytes = 1;
+                Log.Error("Lock Timeout exceeded for ID: {0} | current lock {1} | last lock {2}", Guid, CurrentLockState, LastLockState);
+                throw new Exception($"Lock Timeout exceeded for ID: {Guid} | current lock {CurrentLockState} | last lock {LastLockState}");
             }
-
-            if (handshake)
-            {
-                flags.none = 0;
-                flags.handshake = 1;
-            }
-
-            if (!blowfish && !security_bytes && !handshake) flags.none = 1;
-
-            GenerateSecurity(flags);
         }
-        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        finally
+        {
+            if (lockWasTaken)
+            {
+                Monitor.Exit(m_class_lock);
+            }
+        }
     }
 
     // Queues a packet for processing to be sent. The data is simply formatted and processed during
@@ -163,19 +186,31 @@ public class Security : ISecurity
         if (packet.Opcode == 0x5000 || packet.Opcode == 0x9000)
             throw new SendException("[SecurityAPI::Send] Handshake packets cannot be sent through this function.");
 
-        LastLockStateStart = CurrentLockStateStart;
-        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        LastLockStateStop = CurrentLockStateStop;
-        lock (m_class_lock)
+        var lockWasTaken = false;
+        try
         {
-            LastLockState = CurrentLockState;
-            CurrentLockState = LockState.Send;
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
+            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
+            if (lockWasTaken)
+            {
+                LastLockState = CurrentLockState;
+                CurrentLockState = LockState.ChangeIdentity;
+                if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
-            _mOutgoingPackets.Add(packet);
+                _mOutgoingPackets.Add(packet);
+            }
+            else
+            {
+                Log.Error("Lock Timeout exceeded for ID: {0} | current lock {1} | last lock {2}", Guid, CurrentLockState, LastLockState);
+                throw new Exception($"Lock Timeout exceeded for ID: {Guid} | current lock {CurrentLockState} | last lock {LastLockState}");
+            }
         }
-        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        finally
+        {
+            if (lockWasTaken)
+            {
+                Monitor.Exit(m_class_lock);
+            }
+        }
     }
 
     // Transfers raw incoming data into the security object. Call TransferIncoming to
@@ -191,291 +226,327 @@ public class Security : ISecurity
     {
         var incomingBuffersTmp = new List<TransferBuffer>();
 
-        LastLockStateStart = CurrentLockStateStart;
-        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        LastLockStateStop = CurrentLockStateStop;
-        lock (m_class_lock)
+        var lockWasTaken = false;
+        try
         {
-            LastLockState = CurrentLockState;
-            CurrentLockState = LockState.Recv;
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
-
-            var length = rawBuffer.Size - rawBuffer.Offset;
-            var index = 0;
-            while (length > 0)
+            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
+            if (lockWasTaken)
             {
-                var maxLength = length;
-                var calcLength = _mRecvBuffer.Buffer.Length - _mRecvBuffer.Size;
+                LastLockState = CurrentLockState;
+                CurrentLockState = LockState.ChangeIdentity;
+                if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
-                if (maxLength > calcLength) maxLength = calcLength;
-
-                length -= maxLength;
-
-                Buffer.BlockCopy(rawBuffer.Buffer, rawBuffer.Offset + index, _mRecvBuffer.Buffer, _mRecvBuffer.Size,
-                    maxLength);
-
-                _mRecvBuffer.Size += maxLength;
-                index += maxLength;
-
-                // Loop while we have data to process
-                while (_mRecvBuffer.Size > 0)
+                var length = rawBuffer.Size - rawBuffer.Offset;
+                var index = 0;
+                while (length > 0)
                 {
-                    // If we do not have a current packet object, try to allocate one.
-                    if (_mCurrentBuffer == null)
+                    var maxLength = length;
+                    var calcLength = _mRecvBuffer.Buffer.Length - _mRecvBuffer.Size;
+
+                    if (maxLength > calcLength) maxLength = calcLength;
+
+                    length -= maxLength;
+
+                    Buffer.BlockCopy(rawBuffer.Buffer, rawBuffer.Offset + index, _mRecvBuffer.Buffer, _mRecvBuffer.Size,
+                        maxLength);
+
+                    _mRecvBuffer.Size += maxLength;
+                    index += maxLength;
+
+                    // Loop while we have data to process
+                    while (_mRecvBuffer.Size > 0)
                     {
-                        // We need at least two bytes to allocate a packet.
-                        if (_mRecvBuffer.Size < 2) break;
-
-                        // Calculate the packet size.
-                        var packet_size = (_mRecvBuffer.Buffer[1] << 8) | _mRecvBuffer.Buffer[0];
-
-                        // Check to see if this packet is encrypted.
-                        if ((packet_size & 0x8000) > 0)
+                        // If we do not have a current packet object, try to allocate one.
+                        if (_mCurrentBuffer == null)
                         {
-                            // If so, calculate the total payload size.
-                            packet_size &= 0x7FFF; // Mask off the encryption.
-                            if (_mSecurityFlags.blowfish == 1)
-                                packet_size = 2 + _mBlowfish.GetOutputLength(packet_size + 4);
+                            // We need at least two bytes to allocate a packet.
+                            if (_mRecvBuffer.Size < 2) break;
+
+                            // Calculate the packet size.
+                            var packet_size = (_mRecvBuffer.Buffer[1] << 8) | _mRecvBuffer.Buffer[0];
+
+                            // Check to see if this packet is encrypted.
+                            if ((packet_size & 0x8000) > 0)
+                            {
+                                // If so, calculate the total payload size.
+                                packet_size &= 0x7FFF; // Mask off the encryption.
+                                if (_mSecurityFlags.blowfish == 1)
+                                    packet_size = 2 + _mBlowfish.GetOutputLength(packet_size + 4);
+                                else
+                                    packet_size += 6;
+                            }
                             else
+                            {
+                                // The packet is unencrypted. The final size is simply
+                                // header size + payload size.
                                 packet_size += 6;
+                            }
+
+                            // Allocate the final buffer the packet will be written to
+                            _mCurrentBuffer = new TransferBuffer(packet_size, 0, packet_size);
+                        }
+
+                        // Calculate how many bytes are left to receive in the packet.
+                        var max_copy_count = _mCurrentBuffer.Size - _mCurrentBuffer.Offset;
+
+                        // If we need more bytes than we currently have, update the size.
+                        if (max_copy_count > _mRecvBuffer.Size) max_copy_count = _mRecvBuffer.Size;
+
+                        // Copy the buffer data to the packet buffer
+                        Buffer.BlockCopy(_mRecvBuffer.Buffer, 0, _mCurrentBuffer.Buffer, _mCurrentBuffer.Offset,
+                            max_copy_count);
+
+                        // Update how many bytes we now have
+                        _mCurrentBuffer.Offset += max_copy_count;
+                        _mRecvBuffer.Size -= max_copy_count;
+
+                        // If there is data remaining in the buffer, copy it over the data
+                        // we just removed (sliding buffer).
+                        if (_mRecvBuffer.Size > 0)
+                            Buffer.BlockCopy(_mRecvBuffer.Buffer, max_copy_count, _mRecvBuffer.Buffer, 0,
+                                _mRecvBuffer.Size);
+
+                        // Check to see if the current packet is now complete.
+                        if (_mCurrentBuffer.Size == _mCurrentBuffer.Offset)
+                        {
+                            // If so, dispatch it to the manager class for processing by the system.
+                            _mCurrentBuffer.Offset = 0;
+                            incomingBuffersTmp.Add(_mCurrentBuffer);
+
+                            // Set the current packet to null so we can process the next packet
+                            // in the stream.
+                            _mCurrentBuffer = null;
                         }
                         else
                         {
-                            // The packet is unencrypted. The final size is simply
-                            // header size + payload size.
-                            packet_size += 6;
+                            // Otherwise, we are done with this loop, since we need more
+                            // data for the current packet.
+                            break;
                         }
-
-                        // Allocate the final buffer the packet will be written to
-                        _mCurrentBuffer = new TransferBuffer(packet_size, 0, packet_size);
-                    }
-
-                    // Calculate how many bytes are left to receive in the packet.
-                    var max_copy_count = _mCurrentBuffer.Size - _mCurrentBuffer.Offset;
-
-                    // If we need more bytes than we currently have, update the size.
-                    if (max_copy_count > _mRecvBuffer.Size) max_copy_count = _mRecvBuffer.Size;
-
-                    // Copy the buffer data to the packet buffer
-                    Buffer.BlockCopy(_mRecvBuffer.Buffer, 0, _mCurrentBuffer.Buffer, _mCurrentBuffer.Offset,
-                        max_copy_count);
-
-                    // Update how many bytes we now have
-                    _mCurrentBuffer.Offset += max_copy_count;
-                    _mRecvBuffer.Size -= max_copy_count;
-
-                    // If there is data remaining in the buffer, copy it over the data
-                    // we just removed (sliding buffer).
-                    if (_mRecvBuffer.Size > 0)
-                        Buffer.BlockCopy(_mRecvBuffer.Buffer, max_copy_count, _mRecvBuffer.Buffer, 0,
-                            _mRecvBuffer.Size);
-
-                    // Check to see if the current packet is now complete.
-                    if (_mCurrentBuffer.Size == _mCurrentBuffer.Offset)
-                    {
-                        // If so, dispatch it to the manager class for processing by the system.
-                        _mCurrentBuffer.Offset = 0;
-                        incomingBuffersTmp.Add(_mCurrentBuffer);
-
-                        // Set the current packet to null so we can process the next packet
-                        // in the stream.
-                        _mCurrentBuffer = null;
-                    }
-                    else
-                    {
-                        // Otherwise, we are done with this loop, since we need more
-                        // data for the current packet.
-                        break;
                     }
                 }
-            }
 
-            if (incomingBuffersTmp.Count > 0)
-                foreach (var buffer in incomingBuffersTmp)
-                {
-                    var packet_encrypted = false;
-
-                    var packet_size = (buffer.Buffer[1] << 8) | buffer.Buffer[0];
-                    if ((packet_size & 0x8000) > 0)
+                if (incomingBuffersTmp.Count > 0)
+                    foreach (var buffer in incomingBuffersTmp)
                     {
-                        if (_mSecurityFlags.blowfish == 1)
+                        var packet_encrypted = false;
+
+                        var packet_size = (buffer.Buffer[1] << 8) | buffer.Buffer[0];
+                        if ((packet_size & 0x8000) > 0)
                         {
-                            packet_size &= 0x7FFF;
-                            packet_encrypted = true;
-                        }
-                        else
-                        {
-                            packet_size &= 0x7FFF;
-                        }
-                    }
-
-                    if (packet_encrypted)
-                    {
-                        var decrypted = _mBlowfish.Decode(buffer.Buffer, 2, buffer.Size - 2);
-                        var new_buffer = new byte[6 + packet_size];
-                        Buffer.BlockCopy(BitConverter.GetBytes((ushort)packet_size), 0, new_buffer, 0, 2);
-                        Buffer.BlockCopy(decrypted, 0, new_buffer, 2, 4 + packet_size);
-                        buffer.Buffer = null;
-                        buffer.Buffer = new_buffer;
-                    }
-
-                    var packet_data = new PacketReader(buffer.Buffer);
-                    packet_size = packet_data.ReadUInt16();
-                    var packet_opcode = packet_data.ReadUInt16();
-                    var packet_security_count = packet_data.ReadByte();
-                    var packet_security_crc = packet_data.ReadByte();
-
-                    // Client object whose bytes the server might need to verify
-                    if (_mClientSecurity)
-                        if (_mSecurityFlags.security_bytes == 1)
-                        {
-                            var expected_count = packet_opcode == 0x1001 || _isTrusted
-                                ? (byte)0
-                                : GenerateCountByte(true);
-                            if (packet_security_count != expected_count)
-                                throw new RecvException("[SecurityAPI::Recv] Count byte mismatch.");
-
-                            if (packet_encrypted ||
-                                (_mSecurityFlags.security_bytes == 1 && _mSecurityFlags.blowfish == 0))
-                                if (packet_encrypted || IsEncrypted(packet_opcode))
-                                {
-                                    packet_size |= 0x8000;
-                                    Buffer.BlockCopy(BitConverter.GetBytes((ushort)packet_size), 0, buffer.Buffer,
-                                        0, 2);
-                                }
-
-                            buffer.Buffer[5] = 0;
-
-                            var expected_crc = packet_opcode == 0x1001 || _isTrusted
-                                ? (byte)0
-                                : GenerateCheckByte(buffer.Buffer);
-                            if (packet_security_crc != expected_crc)
-                                throw new RecvException("[SecurityAPI::Recv] CRC byte mismatch.");
-
-                            buffer.Buffer[4] = 0;
-
-                            if (packet_encrypted ||
-                                (_mSecurityFlags.security_bytes == 1 && _mSecurityFlags.blowfish == 0))
-                                if (packet_encrypted || IsEncrypted(packet_opcode))
-                                {
-                                    packet_size &= 0x7FFF;
-                                    Buffer.BlockCopy(BitConverter.GetBytes((ushort)packet_size), 0, buffer.Buffer,
-                                        0, 2);
-                                }
-                        }
-
-                    if (packet_opcode == 0x5000 || packet_opcode == 0x9000) // New logic processing!
-                    {
-                        Handshake(packet_opcode, packet_data, packet_encrypted);
-
-                        // Pass the handshake packets to the user so they can at least see them.
-                        // They do not need to actually do anything with them. This was added to
-                        // help debugging and make output logs complete.
-                        var packet = new Packet(packet_opcode, packet_encrypted, false, buffer.Buffer, 6,
-                            packet_size);
-                        packet.ToReadOnly();
-                        _mIncomingPackets.Add(packet);
-                    }
-                    else
-                    {
-                        if (_mClientSecurity)
-                            // Make sure the client accepted the security system first
-                            if (!_mAcceptedHandshake)
-                                throw new HandshakeException(
-                                    "[SecurityAPI::Recv] The client has not accepted the handshake.");
-
-                        if (packet_opcode == 0x600D) // Auto process massive messages for the user
-                        {
-                            var mode = packet_data.ReadByte();
-                            if (mode == 1)
+                            if (_mSecurityFlags.blowfish == 1)
                             {
-                                _mMassiveCount = packet_data.ReadUInt16();
-                                var contained_packet_opcode = packet_data.ReadUInt16();
-                                _mMassivePacket = new Packet(contained_packet_opcode, packet_encrypted, true);
-                                packet_data.ReadByte();
+                                packet_size &= 0x7FFF;
+                                packet_encrypted = true;
                             }
                             else
                             {
-                                if (_mMassivePacket == null)
-                                    throw new PacketFormatException(
-                                        "[SecurityAPI::Recv] A malformed 0x600D packet was received.");
-
-                                foreach (var readByte in packet_data.ReadBytes(packet_size - 1))
-                                    _mMassivePacket.TryWrite(readByte);
-                                // _mMassivePacket.WriteUInt8Array(packet_data.ReadBytes(packet_size - 1));
-                                _mMassiveCount--;
-                                if (_mMassiveCount == 0)
-                                {
-                                    _mMassivePacket.ToReadOnly();
-                                    _mIncomingPackets.Add(_mMassivePacket);
-                                    _mMassivePacket = null;
-                                }
+                                packet_size &= 0x7FFF;
                             }
                         }
-                        else
+
+                        if (packet_encrypted)
                         {
+                            var decrypted = _mBlowfish.Decode(buffer.Buffer, 2, buffer.Size - 2);
+                            var new_buffer = new byte[6 + packet_size];
+                            Buffer.BlockCopy(BitConverter.GetBytes((ushort)packet_size), 0, new_buffer, 0, 2);
+                            Buffer.BlockCopy(decrypted, 0, new_buffer, 2, 4 + packet_size);
+                            buffer.Buffer = null;
+                            buffer.Buffer = new_buffer;
+                        }
+
+                        var packet_data = new PacketReader(buffer.Buffer);
+                        packet_size = packet_data.ReadUInt16();
+                        var packet_opcode = packet_data.ReadUInt16();
+                        var packet_security_count = packet_data.ReadByte();
+                        var packet_security_crc = packet_data.ReadByte();
+
+                        // Client object whose bytes the server might need to verify
+                        if (_mClientSecurity)
+                            if (_mSecurityFlags.security_bytes == 1)
+                            {
+                                var expected_count = packet_opcode == 0x1001 || _isTrusted
+                                    ? (byte)0
+                                    : GenerateCountByte(true);
+                                if (packet_security_count != expected_count)
+                                    throw new RecvException("[SecurityAPI::Recv] Count byte mismatch.");
+
+                                if (packet_encrypted ||
+                                    (_mSecurityFlags.security_bytes == 1 && _mSecurityFlags.blowfish == 0))
+                                    if (packet_encrypted || IsEncrypted(packet_opcode))
+                                    {
+                                        packet_size |= 0x8000;
+                                        Buffer.BlockCopy(BitConverter.GetBytes((ushort)packet_size), 0, buffer.Buffer,
+                                            0, 2);
+                                    }
+
+                                buffer.Buffer[5] = 0;
+
+                                var expected_crc = packet_opcode == 0x1001 || _isTrusted
+                                    ? (byte)0
+                                    : GenerateCheckByte(buffer.Buffer);
+                                if (packet_security_crc != expected_crc)
+                                    throw new RecvException("[SecurityAPI::Recv] CRC byte mismatch.");
+
+                                buffer.Buffer[4] = 0;
+
+                                if (packet_encrypted ||
+                                    (_mSecurityFlags.security_bytes == 1 && _mSecurityFlags.blowfish == 0))
+                                    if (packet_encrypted || IsEncrypted(packet_opcode))
+                                    {
+                                        packet_size &= 0x7FFF;
+                                        Buffer.BlockCopy(BitConverter.GetBytes((ushort)packet_size), 0, buffer.Buffer,
+                                            0, 2);
+                                    }
+                            }
+
+                        if (packet_opcode == 0x5000 || packet_opcode == 0x9000) // New logic processing!
+                        {
+                            Handshake(packet_opcode, packet_data, packet_encrypted);
+
+                            // Pass the handshake packets to the user so they can at least see them.
+                            // They do not need to actually do anything with them. This was added to
+                            // help debugging and make output logs complete.
                             var packet = new Packet(packet_opcode, packet_encrypted, false, buffer.Buffer, 6,
                                 packet_size);
                             packet.ToReadOnly();
                             _mIncomingPackets.Add(packet);
                         }
+                        else
+                        {
+                            if (_mClientSecurity)
+                                // Make sure the client accepted the security system first
+                                if (!_mAcceptedHandshake)
+                                    throw new HandshakeException(
+                                        "[SecurityAPI::Recv] The client has not accepted the handshake.");
+
+                            if (packet_opcode == 0x600D) // Auto process massive messages for the user
+                            {
+                                var mode = packet_data.ReadByte();
+                                if (mode == 1)
+                                {
+                                    _mMassiveCount = packet_data.ReadUInt16();
+                                    var contained_packet_opcode = packet_data.ReadUInt16();
+                                    _mMassivePacket = new Packet(contained_packet_opcode, packet_encrypted, true);
+                                    packet_data.ReadByte();
+                                }
+                                else
+                                {
+                                    if (_mMassivePacket == null)
+                                        throw new PacketFormatException(
+                                            "[SecurityAPI::Recv] A malformed 0x600D packet was received.");
+
+                                    foreach (var readByte in packet_data.ReadBytes(packet_size - 1))
+                                        _mMassivePacket.TryWrite(readByte);
+                                    // _mMassivePacket.WriteUInt8Array(packet_data.ReadBytes(packet_size - 1));
+                                    _mMassiveCount--;
+                                    if (_mMassiveCount == 0)
+                                    {
+                                        _mMassivePacket.ToReadOnly();
+                                        _mIncomingPackets.Add(_mMassivePacket);
+                                        _mMassivePacket = null;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var packet = new Packet(packet_opcode, packet_encrypted, false, buffer.Buffer, 6,
+                                    packet_size);
+                                packet.ToReadOnly();
+                                _mIncomingPackets.Add(packet);
+                            }
+                        }
                     }
-                }
+            }
+            else
+            {
+                Log.Error("Lock Timeout exceeded for ID: {0} | current lock {1} | last lock {2}", Guid, CurrentLockState, LastLockState);
+                throw new Exception($"Lock Timeout exceeded for ID: {Guid} | current lock {CurrentLockState} | last lock {LastLockState}");
+            }
         }
-        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        finally
+        {
+            if (lockWasTaken)
+            {
+                Monitor.Exit(m_class_lock);
+            }
+        }
     }
 
     public void TransferOutgoing(TcpSession? session)
     {
         if (!HasPacketToSend()) return;
 
-        LastLockStateStart = CurrentLockStateStart;
-        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        LastLockStateStop = CurrentLockStateStop;
-        lock (m_class_lock)
+        var lockWasTaken = false;
+        try
         {
-            LastLockState = CurrentLockState;
-            CurrentLockState = LockState.TransferOutgoingNewSession;
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
-
-            while (HasPacketToSend())
+            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
+            if (lockWasTaken)
             {
-                if (session == null || session.IsDisposed || !session.IsConnected)
-                    break;
+                LastLockState = CurrentLockState;
+                CurrentLockState = LockState.ChangeIdentity;
+                if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
-                var buff = GetPacketToSendLite();
-                session.Send(buff.Buffer, buff.Offset, buff.Size);
+                while (HasPacketToSend())
+                {
+                    if (session == null || session.IsDisposed || !session.IsConnected)
+                        break;
+
+                    var buff = GetPacketToSendLite();
+                    session.Send(buff.Buffer, buff.Offset, buff.Size);
+                }
+            }
+            else
+            {
+                Log.Error("Lock Timeout exceeded for ID: {0} | current lock {1} | last lock {2}", Guid, CurrentLockState, LastLockState);
+                throw new Exception($"Lock Timeout exceeded for ID: {Guid} | current lock {CurrentLockState} | last lock {LastLockState}");
             }
         }
-        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        finally
+        {
+            if (lockWasTaken)
+            {
+                Monitor.Exit(m_class_lock);
+            }
+        }
     }
 
     public void TransferOutgoing(TcpClient client)
     {
         if (!HasPacketToSend()) return;
 
-        LastLockStateStart = CurrentLockStateStart;
-        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        LastLockStateStop = CurrentLockStateStop;
-        lock (m_class_lock)
+        var lockWasTaken = false;
+        try
         {
-            LastLockState = CurrentLockState;
-            CurrentLockState = LockState.TransferOutgoingNewClient;
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
-
-            while (HasPacketToSend())
+            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
+            if (lockWasTaken)
             {
-                if (client.IsDisposed || !client.IsConnected)
-                    break;
+                LastLockState = CurrentLockState;
+                CurrentLockState = LockState.ChangeIdentity;
+                if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
-                var buff = GetPacketToSendLite();
-                client.Send(buff.Buffer, buff.Offset, buff.Size);
+                while (HasPacketToSend())
+                {
+                    if (client.IsDisposed || !client.IsConnected)
+                        break;
+
+                    var buff = GetPacketToSendLite();
+                    client.Send(buff.Buffer, buff.Offset, buff.Size);
+                }
+            }
+            else
+            {
+                Log.Error("Lock Timeout exceeded for ID: {0} | current lock {1} | last lock {2}", Guid, CurrentLockState, LastLockState);
+                throw new Exception($"Lock Timeout exceeded for ID: {Guid} | current lock {CurrentLockState} | last lock {LastLockState}");
             }
         }
-        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        finally
+        {
+            if (lockWasTaken)
+            {
+                Monitor.Exit(m_class_lock);
+            }
+        }
     }
 
     // Returns a list of all packets that are ready for processing. If no packets are available,
@@ -484,23 +555,35 @@ public class Security : ISecurity
     {
         List<Packet> packets = null;
 
-        LastLockStateStart = CurrentLockStateStart;
-        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        LastLockStateStop = CurrentLockStateStop;
-        lock (m_class_lock)
+        var lockWasTaken = false;
+        try
         {
-            LastLockState = CurrentLockState;
-            CurrentLockState = LockState.TransferIncoming;
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
-
-            if (_mIncomingPackets.Count > 0)
+            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
+            if (lockWasTaken)
             {
-                packets = _mIncomingPackets;
-                _mIncomingPackets = new List<Packet>();
+                LastLockState = CurrentLockState;
+                CurrentLockState = LockState.ChangeIdentity;
+                if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
+
+                if (_mIncomingPackets.Count > 0)
+                {
+                    packets = _mIncomingPackets;
+                    _mIncomingPackets = new List<Packet>();
+                }
+            }
+            else
+            {
+                Log.Error("Lock Timeout exceeded for ID: {0} | current lock {1} | last lock {2}", Guid, CurrentLockState, LastLockState);
+                throw new Exception($"Lock Timeout exceeded for ID: {Guid} | current lock {CurrentLockState} | last lock {LastLockState}");
             }
         }
-        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        finally
+        {
+            if (lockWasTaken)
+            {
+                Monitor.Exit(m_class_lock);
+            }
+        }
 
         return packets;
     }
@@ -530,23 +613,35 @@ public class Security : ISecurity
     {
         List<KeyValuePair<TransferBuffer, Packet>> buffers = null;
 
-        LastLockStateStart = CurrentLockStateStart;
-        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        LastLockStateStop = CurrentLockStateStop;
-        lock (m_class_lock)
+        var lockWasTaken = false;
+        try
         {
-            LastLockState = CurrentLockState;
-            CurrentLockState = LockState.TransferOutgoing;
-            if (Debug)
-                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
-
-            if (HasPacketToSend())
+            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
+            if (lockWasTaken)
             {
-                buffers = new List<KeyValuePair<TransferBuffer, Packet>>();
-                while (HasPacketToSend()) buffers.Add(GetPacketToSend());
+                LastLockState = CurrentLockState;
+                CurrentLockState = LockState.ChangeIdentity;
+                if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
+
+                if (HasPacketToSend())
+                {
+                    buffers = new List<KeyValuePair<TransferBuffer, Packet>>();
+                    while (HasPacketToSend()) buffers.Add(GetPacketToSend());
+                }
+            }
+            else
+            {
+                Log.Error("Lock Timeout exceeded for ID: {0} | current lock {1} | last lock {2}", Guid, CurrentLockState, LastLockState);
+                throw new Exception($"Lock Timeout exceeded for ID: {Guid} | current lock {CurrentLockState} | last lock {LastLockState}");
             }
         }
-        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        finally
+        {
+            if (lockWasTaken)
+            {
+                Monitor.Exit(m_class_lock);
+            }
+        }
 
         return buffers;
     }
@@ -1369,11 +1464,7 @@ public class Security : ISecurity
     private Guid Guid { get; } = Guid.NewGuid();
     private bool Debug { get; set; } = false;
     private LockState CurrentLockState { get; set; } = LockState.None;
-    private long CurrentLockStateStart { get; set; } = -1;
-    private long CurrentLockStateStop { get; set; } = -1;
     private LockState LastLockState { get; set; } = LockState.None;
-    private long LastLockStateStart { get; set; } = -1;
-    private long LastLockStateStop { get; set; } = -1;
 
     public Guid GetId()
     {
@@ -1391,21 +1482,9 @@ public class Security : ISecurity
     {
         return CurrentLockState;
     }
-    public long GetCurrentLockStart()
-    {
-        return CurrentLockStateStart;
-    }
     public LockState GetLastLockState()
     {
         return LastLockState;
-    }
-    public long GetLastLockStart()
-    {
-        return LastLockStateStart;
-    }
-    public long GetLastLockStop()
-    {
-        return LastLockStateStop;
     }
 
     #endregion
