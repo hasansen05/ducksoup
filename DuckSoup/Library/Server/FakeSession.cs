@@ -151,6 +151,8 @@ public class FakeSession : TcpSession
             Session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             Session.GetData(Data.CharId, out int charId, -1);
             Log.Error("FakeSession Recv | 0x{0:X} | Name: {1} | Id: {2} | ServerType: {3} ", message, (charInfo != null ? charInfo.CharName : "null"), charId, FakeServer.Service.ServerType);
+            Log.Error("FakeSession Recv | SSAClientId: {1} | Current: {2} | Last: {3} ", Session.GetServerSecurity().GetId(), Session.GetServerSecurity().GetCurrentLockState(), Session.GetServerSecurity().GetLastLockState());
+            Log.Error("FakeSession Recv | SSAServerId: {1} | Current: {2} | Last: {3} ", Session.GetClientSecurity().GetId(), Session.GetClientSecurity().GetCurrentLockState(), Session.GetClientSecurity().GetLastLockState());
             Log.Error("FakeSession Recv | {0}", exception.Message);
             Log.Error("FakeSession Recv | {0}", exception.StackTrace);
             Log.Error("FakeSession Recv | {0}", exception.InnerException);
