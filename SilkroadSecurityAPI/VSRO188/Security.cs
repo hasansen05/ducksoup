@@ -103,6 +103,7 @@ public class Security : ISecurity
         var lockWasTaken = false;
         try
         {
+            Monitor.Enter(m_class_lock);
             lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
@@ -135,6 +136,7 @@ public class Security : ISecurity
         var lockWasTaken = false;
         try
         {
+            Monitor.Enter(m_class_lock);
             lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
@@ -190,6 +192,7 @@ public class Security : ISecurity
         var lockWasTaken = false;
         try
         {
+            Monitor.Enter(m_class_lock);
             lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
@@ -230,6 +233,7 @@ public class Security : ISecurity
         var lockWasTaken = false;
         try
         {
+            Monitor.Enter(m_class_lock);
             lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
@@ -480,6 +484,7 @@ public class Security : ISecurity
         var lockWasTaken = false;
         try
         {
+            Monitor.Enter(m_class_lock);
             lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
@@ -520,6 +525,7 @@ public class Security : ISecurity
         var lockWasTaken = false;
         try
         {
+            Monitor.Enter(m_class_lock);
             lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
@@ -562,6 +568,7 @@ public class Security : ISecurity
         var lockWasTaken = false;
         try
         {
+            Monitor.Enter(m_class_lock);
             lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
@@ -615,6 +622,7 @@ public class Security : ISecurity
         var lockWasTaken = false;
         try
         {
+            Monitor.Enter(m_class_lock);
             lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
