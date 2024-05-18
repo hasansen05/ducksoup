@@ -107,6 +107,8 @@ public class Security : ISecurity
         {
             LastLockState = CurrentLockState;
             CurrentLockState = LockState.ChangeIdentity;
+            if (Debug)
+                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
             _mIdentityName = name;
             _mIdentityFlag = flag;
         }
@@ -124,7 +126,9 @@ public class Security : ISecurity
         {
             LastLockState = CurrentLockState;
             CurrentLockState = LockState.GenerateSecurity;
-            
+            if (Debug)
+                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
+
             var flags = new SecurityFlags();
             if (blowfish)
             {
@@ -165,6 +169,8 @@ public class Security : ISecurity
         {
             LastLockState = CurrentLockState;
             CurrentLockState = LockState.Send;
+            if (Debug)
+                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
 
             _mOutgoingPackets.Add(packet);
         }
@@ -183,7 +189,7 @@ public class Security : ISecurity
     public void Recv(TransferBuffer rawBuffer)
     {
         var incomingBuffersTmp = new List<TransferBuffer>();
-        
+
         LastLockStateStart = CurrentLockStateStart;
         CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         LastLockStateStop = CurrentLockStateStop;
@@ -191,12 +197,14 @@ public class Security : ISecurity
         {
             LastLockState = CurrentLockState;
             CurrentLockState = LockState.Recv;
-            
+            if (Debug)
+                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
+
             var length = rawBuffer.Size - rawBuffer.Offset;
             var index = 0;
             while (length > 0)
             {
-                if(Debug)
+                if (Debug)
                     Log.Debug("Security:170 ThreadId: {0} {1}", Guid, Environment.CurrentManagedThreadId);
                 var maxLength = length;
                 var calcLength = _mRecvBuffer.Buffer.Length - _mRecvBuffer.Size;
@@ -214,7 +222,7 @@ public class Security : ISecurity
                 // Loop while we have data to process
                 while (_mRecvBuffer.Size > 0)
                 {
-                    if(Debug)
+                    if (Debug)
                         Log.Debug("Security:187 ThreadId: {0}  {1}", Guid, Environment.CurrentManagedThreadId);
                     // If we do not have a current packet object, try to allocate one.
                     if (_mCurrentBuffer == null)
@@ -419,7 +427,7 @@ public class Security : ISecurity
     public void TransferOutgoing(TcpSession? session)
     {
         if (!HasPacketToSend()) return;
-        
+
         LastLockStateStart = CurrentLockStateStart;
         CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         LastLockStateStop = CurrentLockStateStop;
@@ -427,10 +435,12 @@ public class Security : ISecurity
         {
             LastLockState = CurrentLockState;
             CurrentLockState = LockState.TransferOutgoingNewSession;
+            if (Debug)
+                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
 
             while (HasPacketToSend())
             {
-                if(Debug)
+                if (Debug)
                     Log.Debug("Security:393 ThreadId: {0}  {1}", Guid, Environment.CurrentManagedThreadId);
                 if (session == null || session.IsDisposed || !session.IsConnected)
                     break;
@@ -453,10 +463,12 @@ public class Security : ISecurity
         {
             LastLockState = CurrentLockState;
             CurrentLockState = LockState.TransferOutgoingNewClient;
+            if (Debug)
+                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
 
             while (HasPacketToSend())
             {
-                if(Debug)
+                if (Debug)
                     Log.Debug("Security:408 {0}", Guid);
                 if (client == null || client.IsDisposed || !client.IsConnected)
                     break;
@@ -473,7 +485,7 @@ public class Security : ISecurity
     public List<Packet> TransferIncoming()
     {
         List<Packet> packets = null;
-        
+
         LastLockStateStart = CurrentLockStateStart;
         CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         LastLockStateStop = CurrentLockStateStop;
@@ -481,7 +493,9 @@ public class Security : ISecurity
         {
             LastLockState = CurrentLockState;
             CurrentLockState = LockState.TransferIncoming;
-            
+            if (Debug)
+                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
+
             if (_mIncomingPackets.Count > 0)
             {
                 packets = _mIncomingPackets;
@@ -512,7 +526,7 @@ public class Security : ISecurity
     public List<KeyValuePair<TransferBuffer, Packet>> TransferOutgoing()
     {
         List<KeyValuePair<TransferBuffer, Packet>> buffers = null;
-        
+
         LastLockStateStart = CurrentLockStateStart;
         CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         LastLockStateStop = CurrentLockStateStop;
@@ -520,12 +534,14 @@ public class Security : ISecurity
         {
             LastLockState = CurrentLockState;
             CurrentLockState = LockState.TransferOutgoing;
+            if (Debug)
+                Log.Information("Changing lock to {0} last lock was {1} it took {2}ms [{3} {4}]", CurrentLockState, LastLockState, LastLockStateStop - LastLockStateStart, LastLockStateStart, LastLockStateStop);
             if (HasPacketToSend())
             {
                 buffers = new List<KeyValuePair<TransferBuffer, Packet>>();
                 while (HasPacketToSend())
                 {
-                    if(Debug)
+                    if (Debug)
                         Log.Debug("Security:460 {0}", Guid);
                     buffers.Add(GetPacketToSend());
                 }
@@ -794,7 +810,7 @@ public class Security : ISecurity
 
         while (X != 0)
         {
-            if(Debug)
+            if (Debug)
                 Log.Debug("Security:728 {0}", Guid);
             if ((X & 1) > 0) result = mult * result % P;
 
@@ -1232,7 +1248,7 @@ public class Security : ISecurity
 
             while (workspace.Size > 0)
             {
-                if(Debug)
+                if (Debug)
                     Log.Debug("Security:1165 {0}", Guid);
                 var part_data = new PacketWriter();
 
@@ -1370,7 +1386,7 @@ public class Security : ISecurity
     private LockState LastLockState { get; set; } = LockState.None;
     private long LastLockStateStart { get; set; } = -1;
     private long LastLockStateStop { get; set; } = -1;
-    
+
     public Guid GetId()
     {
         return Guid;
@@ -1405,4 +1421,5 @@ public class Security : ISecurity
     }
 
     #endregion
+
 }
