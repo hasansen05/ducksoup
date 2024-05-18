@@ -192,7 +192,7 @@ public class Security : ISecurity
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
-                CurrentLockState = LockState.ChangeIdentity;
+                CurrentLockState = LockState.Send;
                 if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
                 _mOutgoingPackets.Add(packet);
@@ -231,7 +231,7 @@ public class Security : ISecurity
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
-                CurrentLockState = LockState.ChangeIdentity;
+                CurrentLockState = LockState.Recv;
                 if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
                 var length = rawBuffer.Size - rawBuffer.Offset;
@@ -480,7 +480,7 @@ public class Security : ISecurity
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
-                CurrentLockState = LockState.ChangeIdentity;
+                CurrentLockState = LockState.TransferOutgoingNewSession;
                 if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
                 while (HasPacketToSend())
@@ -519,7 +519,7 @@ public class Security : ISecurity
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
-                CurrentLockState = LockState.ChangeIdentity;
+                CurrentLockState = LockState.TransferOutgoingNewClient;
                 if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
                 while (HasPacketToSend())
@@ -560,7 +560,7 @@ public class Security : ISecurity
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
-                CurrentLockState = LockState.ChangeIdentity;
+                CurrentLockState = LockState.TransferIncoming;
                 if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
                 if (_mIncomingPackets.Count > 0)
@@ -612,7 +612,7 @@ public class Security : ISecurity
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
-                CurrentLockState = LockState.ChangeIdentity;
+                CurrentLockState = LockState.TransferOutgoing;
                 if (Debug) Log.Debug("Changing lock to {0} last lock was {1}", CurrentLockState, LastLockState);
 
                 if (HasPacketToSend())
