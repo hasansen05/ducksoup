@@ -25,7 +25,8 @@ public class Security : ISecurity
 
     private readonly TransferBuffer _mRecvBuffer;
     
-    private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+    private const int LockTimeout = 2000;
+    private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
     private bool _mAcceptedHandshake;
     private ulong _mChallengeKey;
     private ulong _mClientKey;
@@ -98,7 +99,7 @@ public class Security : ISecurity
     // this security object.
     public void ChangeIdentity(string name, byte flag)
     {
-        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromMilliseconds(LockTimeout));
         try
         {
             if (lockWasTaken)
@@ -129,7 +130,7 @@ public class Security : ISecurity
     // is being used to process an incoming connection's data (server).
     public void GenerateSecurity(bool blowfish, bool security_bytes, bool handshake)
     {
-        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromMilliseconds(LockTimeout));
         try
         {
             if (lockWasTaken)
@@ -183,7 +184,7 @@ public class Security : ISecurity
         if (packet.Opcode == 0x5000 || packet.Opcode == 0x9000)
             throw new SendException("[SecurityAPI::Send] Handshake packets cannot be sent through this function.");
 
-        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromMilliseconds(LockTimeout));
         try
         {
             if (lockWasTaken)
@@ -222,7 +223,7 @@ public class Security : ISecurity
     {
         var incomingBuffersTmp = new List<TransferBuffer>();
 
-        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromMilliseconds(LockTimeout));
         try
         {
             if (lockWasTaken)
@@ -471,7 +472,7 @@ public class Security : ISecurity
     {
         if (!HasPacketToSend()) return;
 
-        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromMilliseconds(LockTimeout));
         try
         {
             if (lockWasTaken)
@@ -510,7 +511,7 @@ public class Security : ISecurity
     {
         if (!HasPacketToSend()) return;
 
-        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromMilliseconds(LockTimeout));
         try
         {
             if (lockWasTaken)
@@ -551,7 +552,7 @@ public class Security : ISecurity
     {
         List<Packet> packets = null;
 
-        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromMilliseconds(LockTimeout));
         try
         {
             if (lockWasTaken)
@@ -603,7 +604,7 @@ public class Security : ISecurity
     {
         List<KeyValuePair<TransferBuffer, Packet>> buffers = null;
 
-        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromMilliseconds(LockTimeout));
         try
         {
             if (lockWasTaken)

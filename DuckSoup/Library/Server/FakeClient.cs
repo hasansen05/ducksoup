@@ -121,8 +121,8 @@ public class FakeClient : TcpClient
             Session.GetData(Data.CharInfo, out ICharInfo? charInfo, null);
             Session.GetData(Data.CharId, out int charId, -1);
             Log.Error("FakeClient Recv | 0x{0:X} | Name: {1} | Id: {2} | ServerType: {3} ", message, (charInfo != null? charInfo.CharName : "null"), charId, FakeServer.Service.ServerType);
-            Log.Error("FakeClient Recv | SSAClientId: {1} | Current: {2} | Last: {3} ", Session.GetServerSecurity().GetId(), Session.GetServerSecurity().GetCurrentLockState(), Session.GetServerSecurity().GetLastLockState());
-            Log.Error("FakeClient Recv | SSAServerId: {1} | Current: {2} | Last: {3} ", Session.GetClientSecurity().GetId(), Session.GetClientSecurity().GetCurrentLockState(), Session.GetClientSecurity().GetLastLockState());
+            Log.Error("FakeClient Recv | SSAClientId: {0} | Current: {1} | Last: {2} ", Session.GetServerSecurity().GetId(), Session.GetServerSecurity().GetCurrentLockState(), Session.GetServerSecurity().GetLastLockState());
+            Log.Error("FakeClient Recv | SSAServerId: {0} | Current: {1} | Last: {2} ", Session.GetClientSecurity().GetId(), Session.GetClientSecurity().GetCurrentLockState(), Session.GetClientSecurity().GetLastLockState());
             Log.Error("FakeClient Recv | {0}", exception.Message);
             Log.Error("FakeClient Recv | {0}", exception.StackTrace);
             Log.Error("FakeClient Recv | {0}", exception.InnerException);
