@@ -391,27 +391,33 @@ public class Security : ISecurity
     {
         if (!HasPacketToSend()) return;
 
-        while (HasPacketToSend())
+        lock (m_class_lock)
         {
-            if (session == null || session.IsDisposed || !session.IsConnected)
-                break;
-            
-            var buff = GetPacketToSendLite();
-            session.Send(buff.Buffer, buff.Offset, buff.Size);
+            while (HasPacketToSend())
+            {
+                if (session == null || session.IsDisposed || !session.IsConnected)
+                    break;
+
+                var buff = GetPacketToSendLite();
+                session.Send(buff.Buffer, buff.Offset, buff.Size);
+            }
         }
     }
 
     public void TransferOutgoing(TcpClient client)
     {
         if (!HasPacketToSend()) return;
-
-        while (HasPacketToSend())
+        
+        lock (m_class_lock)
         {
-            if (client.IsDisposed || !client.IsConnected)
-                break;
+            while (HasPacketToSend())
+            {
+                if (client.IsDisposed || !client.IsConnected)
+                    break;
 
-            var buff = GetPacketToSendLite();
-            client.Send(buff.Buffer, buff.Offset, buff.Size);
+                var buff = GetPacketToSendLite();
+                client.Send(buff.Buffer, buff.Offset, buff.Size);
+            }
         }
     }
 
@@ -1316,6 +1322,51 @@ public class Security : ISecurity
             packet.ToReadOnly();
             return new TransferBuffer(raw_bytes, 0, raw_bytes.Length, true);
         }
+    }
+
+    #endregion
+    
+    #region Debug
+
+    private Guid Guid { get; } = Guid.NewGuid();
+    private bool Debug { get; set; } = false;
+    private LockState CurrentLockState { get; set; } = LockState.None;
+    private long CurrentLockStateStart { get; set; } = -1;
+    private LockState LastLockState { get; set; } = LockState.None;
+    private long LastLockStateStart { get; set; } = -1;
+    private long LastLockStateStop { get; set; } = -1;
+    
+    public Guid GetId()
+    {
+        return Guid;
+    }
+    public void SetDebug(bool enable)
+    {
+        Debug = enable;
+    }
+    public bool IsDebug()
+    {
+        return Debug;
+    }
+    public LockState GetCurrentLockState()
+    {
+        return CurrentLockState;
+    }
+    public long GetCurrentLockStart()
+    {
+        return CurrentLockStateStart;
+    }
+    public LockState GetLastLockState()
+    {
+        return LastLockState;
+    }
+    public long GetLastLockStart()
+    {
+        return LastLockStateStart;
+    }
+    public long GetLastLockStop()
+    {
+        return LastLockStateStop;
     }
 
     #endregion

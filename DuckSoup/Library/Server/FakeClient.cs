@@ -76,7 +76,7 @@ public class FakeClient : TcpClient
                 
                 var packetType = packet.Encrypted ? "[E]" : packet.Massive ? "[M]" : "";
                 message = $"[S -> P] {packetType} Packet: 0x{packet.MsgId:X} - {Id}";
-                Log.Debug(message);
+                Log.Verbose(message);
 
                 if (packet.MsgId == 0x5000 || packet.MsgId == 0x9000) continue;
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NetCoreServer;
 using SilkroadSecurityAPI.Message;
 
@@ -14,4 +15,13 @@ public interface ISecurity
     List<Packet> TransferIncoming();
     void TransferOutgoing(TcpSession session);
     void TransferOutgoing(TcpClient client);
+    Guid GetId();
+    void SetDebug(bool enable);
+    bool IsDebug();
+    LockState GetCurrentLockState();
+    long GetCurrentLockStart();
+    LockState GetLastLockState();
+    long GetLastLockStart();
+    long GetLastLockStop();
+
 }

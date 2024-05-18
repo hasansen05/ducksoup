@@ -113,7 +113,7 @@ public class FakeSession : TcpSession
             {
                 var packetType = packet.Encrypted ? "[E]" : packet.Massive ? "[M]" : "";
                 message = $"[C -> P] {packetType} Packet: 0x{packet.MsgId:X} - {Id}";
-                Log.Debug(message);
+                Log.Verbose(message);
 
                 if (packet.MsgId == 0x5000 || packet.MsgId == 0x9000 || packet.MsgId == 0x2001) continue;
 
