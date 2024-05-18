@@ -24,7 +24,8 @@ public class Security : ISecurity
     private readonly List<Packet> _mOutgoingPackets;
 
     private readonly TransferBuffer _mRecvBuffer;
-
+    
+    private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
     private readonly object m_class_lock;
     private bool _mAcceptedHandshake;
     private ulong _mChallengeKey;
@@ -100,10 +101,9 @@ public class Security : ISecurity
     // this security object.
     public void ChangeIdentity(string name, byte flag)
     {
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(1)).Result;
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -132,10 +132,9 @@ public class Security : ISecurity
     // is being used to process an incoming connection's data (server).
     public void GenerateSecurity(bool blowfish, bool security_bytes, bool handshake)
     {
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(1)).Result;
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -187,10 +186,9 @@ public class Security : ISecurity
         if (packet.Opcode == 0x5000 || packet.Opcode == 0x9000)
             throw new SendException("[SecurityAPI::Send] Handshake packets cannot be sent through this function.");
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(1)).Result;
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -227,10 +225,9 @@ public class Security : ISecurity
     {
         var incomingBuffersTmp = new List<TransferBuffer>();
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(1)).Result;
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -477,10 +474,9 @@ public class Security : ISecurity
     {
         if (!HasPacketToSend()) return;
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(1)).Result;
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -517,10 +513,9 @@ public class Security : ISecurity
     {
         if (!HasPacketToSend()) return;
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(1)).Result;
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -559,10 +554,9 @@ public class Security : ISecurity
     {
         List<Packet> packets = null;
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(1)).Result;
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -612,10 +606,9 @@ public class Security : ISecurity
     {
         List<KeyValuePair<TransferBuffer, Packet>> buffers = null;
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(1)).Result;
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
