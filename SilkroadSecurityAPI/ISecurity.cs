@@ -19,9 +19,6 @@ public interface ISecurity
     void SetDebug(bool enable);
     bool IsDebug();
     LockState GetCurrentLockState();
-    long GetCurrentLockStart();
     LockState GetLastLockState();
-    long GetLastLockStart();
-    long GetLastLockStop();
 
 }
