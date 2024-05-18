@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
+using SilkroadSecurityAPI;
 using SilkroadSecurityAPI.Message;
 
 namespace PacketLibrary.Handler;
@@ -45,6 +46,20 @@ public interface ISession
     /// <returns></returns>
     [Obsolete("This seems to bug alot. Don't use")]
     Task QueueToServer(Packet packet);
+
+    /// <summary>
+    ///     Gives you the SecurityAPI object for the server (P -> S)
+    /// </summary>
+    /// <returns></returns>
+    [Obsolete("Do not interact with it, beside you know what you're doing.")]
+    ISecurity GetServerSecurity();
+
+    /// <summary>
+    ///     Gives you the SecurityAPI object for the client (P -> C)
+    /// </summary>
+    /// <returns></returns>
+    [Obsolete("Do not interact with it, beside you know what you're doing.")]
+    ISecurity GetClientSecurity();
 
     /// <summary>
     ///     Transfers the current packet queue to the Client. Packets can be queued with <see cref="QueueToClient" />

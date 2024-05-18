@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using PacketLibrary.Handler;
 using PacketLibrary.VSRO188.Agent.Enums.Chat;
 using PacketLibrary.VSRO188.Agent.Server;
+using SilkroadSecurityAPI;
 using SilkroadSecurityAPI.Message;
 
 namespace DuckSoup.Library.Session;
@@ -60,6 +61,16 @@ public class DuckSession : ISession
     {
         Server.Send(packet);
         return Task.CompletedTask;
+    }
+
+    public ISecurity GetServerSecurity()
+    {
+        return Server.ServerSecurity;
+    }
+
+    public ISecurity GetClientSecurity()
+    {
+        return Client.ClientSecurity;
     }
 
     public Task TransferToClient()

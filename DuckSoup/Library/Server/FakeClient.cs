@@ -23,7 +23,7 @@ public class FakeClient : TcpClient
     }
 
     public ISession? Session { get; internal set; }
-    private ISecurity ServerSecurity { get; }
+    internal ISecurity ServerSecurity { get; }
     private FakeServer FakeServer { get; }
 
     protected override void OnConnected()

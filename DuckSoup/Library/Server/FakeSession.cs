@@ -47,7 +47,7 @@ public class FakeSession : TcpSession
     }
 
     public ISession? Session { get; }
-    private ISecurity ClientSecurity { get; }
+    internal ISecurity ClientSecurity { get; }
     private FakeServer FakeServer { get; }
 
     protected override void OnConnected()
