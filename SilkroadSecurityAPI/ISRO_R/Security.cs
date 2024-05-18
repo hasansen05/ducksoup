@@ -98,19 +98,31 @@ public class Security : ISecurity
     // this security object.
     public void ChangeIdentity(string name, byte flag)
     {
+        LastLockStateStart = CurrentLockStateStart;
+        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        LastLockStateStop = CurrentLockStateStop;
         lock (m_class_lock)
         {
+            LastLockState = CurrentLockState;
+            CurrentLockState = LockState.ChangeIdentity;
             _mIdentityName = name;
             _mIdentityFlag = flag;
         }
+        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
     // Generates the security settings. This should only be called if the security object
     // is being used to process an incoming connection's data (server).
     public void GenerateSecurity(bool blowfish, bool security_bytes, bool handshake)
     {
+        LastLockStateStart = CurrentLockStateStart;
+        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        LastLockStateStop = CurrentLockStateStop;
         lock (m_class_lock)
         {
+            LastLockState = CurrentLockState;
+            CurrentLockState = LockState.GenerateSecurity;
+            
             var flags = new SecurityFlags();
             if (blowfish)
             {
@@ -134,6 +146,7 @@ public class Security : ISecurity
 
             GenerateSecurity(flags);
         }
+        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
     // Queues a packet for processing to be sent. The data is simply formatted and processed during
@@ -143,10 +156,17 @@ public class Security : ISecurity
         if (packet.Opcode == 0x5000 || packet.Opcode == 0x9000)
             throw new SendException("[SecurityAPI::Send] Handshake packets cannot be sent through this function.");
 
+        LastLockStateStart = CurrentLockStateStart;
+        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        LastLockStateStop = CurrentLockStateStop;
         lock (m_class_lock)
         {
+            LastLockState = CurrentLockState;
+            CurrentLockState = LockState.Send;
+            
             _mOutgoingPackets.Add(packet);
         }
+        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
     // Transfers raw incoming data into the security object. Call TransferIncoming to
@@ -161,8 +181,15 @@ public class Security : ISecurity
     public void Recv(TransferBuffer rawBuffer)
     {
         var incomingBuffersTmp = new List<TransferBuffer>();
+        
+        LastLockStateStart = CurrentLockStateStart;
+        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        LastLockStateStop = CurrentLockStateStop;
         lock (m_class_lock)
         {
+            LastLockState = CurrentLockState;
+            CurrentLockState = LockState.Recv;
+            
             var length = rawBuffer.Size - rawBuffer.Offset;
             var index = 0;
             while (length > 0)
@@ -385,14 +412,21 @@ public class Security : ISecurity
                     }
                 }
         }
+        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
     public void TransferOutgoing(TcpSession? session)
     {
         if (!HasPacketToSend()) return;
 
+        LastLockStateStart = CurrentLockStateStart;
+        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        LastLockStateStop = CurrentLockStateStop;
         lock (m_class_lock)
         {
+            LastLockState = CurrentLockState;
+            CurrentLockState = LockState.TransferOutgoingNewSession;
+
             while (HasPacketToSend())
             {
                 if (session == null || session.IsDisposed || !session.IsConnected)
@@ -402,14 +436,21 @@ public class Security : ISecurity
                 session.Send(buff.Buffer, buff.Offset, buff.Size);
             }
         }
+        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
     public void TransferOutgoing(TcpClient client)
     {
         if (!HasPacketToSend()) return;
         
+        LastLockStateStart = CurrentLockStateStart;
+        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        LastLockStateStop = CurrentLockStateStop;
         lock (m_class_lock)
         {
+            LastLockState = CurrentLockState;
+            CurrentLockState = LockState.TransferOutgoingNewClient;
+            
             while (HasPacketToSend())
             {
                 if (client.IsDisposed || !client.IsConnected)
@@ -419,6 +460,7 @@ public class Security : ISecurity
                 client.Send(buff.Buffer, buff.Offset, buff.Size);
             }
         }
+        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
     // Returns a list of all packets that are ready for processing. If no packets are available,
@@ -426,14 +468,22 @@ public class Security : ISecurity
     public List<Packet> TransferIncoming()
     {
         List<Packet> packets = null;
+        
+        LastLockStateStart = CurrentLockStateStart;
+        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        LastLockStateStop = CurrentLockStateStop;
         lock (m_class_lock)
         {
+            LastLockState = CurrentLockState;
+            CurrentLockState = LockState.TransferIncoming;
+
             if (_mIncomingPackets.Count > 0)
             {
                 packets = _mIncomingPackets;
                 _mIncomingPackets = new List<Packet>();
             }
         }
+        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
         return packets;
     }
@@ -462,14 +512,22 @@ public class Security : ISecurity
     public List<KeyValuePair<TransferBuffer, Packet>> TransferOutgoing()
     {
         List<KeyValuePair<TransferBuffer, Packet>> buffers = null;
+        
+        LastLockStateStart = CurrentLockStateStart;
+        CurrentLockStateStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        LastLockStateStop = CurrentLockStateStop;
         lock (m_class_lock)
         {
+            LastLockState = CurrentLockState;
+            CurrentLockState = LockState.TransferOutgoing;
+
             if (HasPacketToSend())
             {
                 buffers = new List<KeyValuePair<TransferBuffer, Packet>>();
                 while (HasPacketToSend()) buffers.Add(GetPacketToSend());
             }
         }
+        CurrentLockStateStop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
         return buffers;
     }
@@ -1332,6 +1390,7 @@ public class Security : ISecurity
     private bool Debug { get; set; } = false;
     private LockState CurrentLockState { get; set; } = LockState.None;
     private long CurrentLockStateStart { get; set; } = -1;
+    private long CurrentLockStateStop { get; set; } = -1;
     private LockState LastLockState { get; set; } = LockState.None;
     private long LastLockStateStart { get; set; } = -1;
     private long LastLockStateStop { get; set; } = -1;
