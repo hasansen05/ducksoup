@@ -123,7 +123,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -174,7 +174,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -207,7 +207,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -465,7 +465,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -504,7 +504,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -543,7 +543,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -579,7 +579,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
 
@@ -636,7 +636,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
         return buffers;
