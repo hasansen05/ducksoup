@@ -24,7 +24,7 @@ public class Security : ISecurity
 
     private readonly TransferBuffer _mRecvBuffer;
 
-    private readonly object m_class_lock;
+    private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
     private bool _isTrusted;
     private bool _mAcceptedHandshake;
     private ulong _mChallengeKey;
@@ -92,18 +92,16 @@ public class Security : ISecurity
 
         _mMassiveCount = 0;
         _mMassivePacket = null;
-
-        m_class_lock = new object();
     }
 
     // Changes the 0x2001 identify packet data that will be sent out by
     // this security object.
     public void ChangeIdentity(string name, byte flag)
     {
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -122,7 +120,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -131,10 +129,10 @@ public class Security : ISecurity
     // is being used to process an incoming connection's data (server).
     public void GenerateSecurity(bool blowfish, bool security_bytes, bool handshake)
     {
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -174,7 +172,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -186,10 +184,10 @@ public class Security : ISecurity
         if (packet.Opcode == 0x5000 || packet.Opcode == 0x9000)
             throw new SendException("[SecurityAPI::Send] Handshake packets cannot be sent through this function.");
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -208,7 +206,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -226,10 +224,10 @@ public class Security : ISecurity
     {
         var incomingBuffersTmp = new List<TransferBuffer>();
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -468,7 +466,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -477,10 +475,10 @@ public class Security : ISecurity
     {
         if (!HasPacketToSend()) return;
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -506,7 +504,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -515,10 +513,10 @@ public class Security : ISecurity
     {
         if (!HasPacketToSend()) return;
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -544,7 +542,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
     }
@@ -555,10 +553,10 @@ public class Security : ISecurity
     {
         List<Packet> packets = null;
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -581,7 +579,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
 
@@ -613,10 +611,10 @@ public class Security : ISecurity
     {
         List<KeyValuePair<TransferBuffer, Packet>> buffers = null;
 
-        var lockWasTaken = false;
+        bool lockWasTaken = semaphoreSlim.Wait(TimeSpan.FromSeconds(20));
+
         try
         {
-            lockWasTaken = Monitor.Wait(m_class_lock, TimeSpan.FromSeconds(5));
             if (lockWasTaken)
             {
                 LastLockState = CurrentLockState;
@@ -639,7 +637,7 @@ public class Security : ISecurity
         {
             if (lockWasTaken)
             {
-                Monitor.Exit(m_class_lock);
+                semaphoreSlim.Release();
             }
         }
 
