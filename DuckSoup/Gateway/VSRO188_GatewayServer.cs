@@ -76,9 +76,13 @@ public class VSRO188_GatewayServer : FakeServer
             data.AgentServer.Port = (ushort)agentServer.Service.BindPort;
 
             if (agentServer.Service.SpoofMachine_Machine != null &&
-                agentServer.Service.SpoofMachine_Machine.Address != "")
+                agentServer.Service.SpoofMachine_Machine.Address != "") {
                 data.AgentServer.Host = agentServer.Service.SpoofMachine_Machine.Address;
+            }
+            
         }
+
+        Log.Verbose("{0} - Connecting to {1}:{2}", Service.Name, data.AgentServer.Host, data.AgentServer.Port);
 
         return data;
     }
